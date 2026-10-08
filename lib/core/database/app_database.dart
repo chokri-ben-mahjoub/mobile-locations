@@ -63,13 +63,13 @@ ContractsCompanion _seed(
   );
 }
 
-@DriftDatabase(tables: [AppSettings, Contracts])
+@DriftDatabase(tables: [AppSettings, Contracts, Payments])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +78,11 @@ class AppDatabase extends _$AppDatabase {
           await into(appSettings).insert(const AppSettingsCompanion());
           for (final contract in _seedContracts) {
             await into(contracts).insert(contract);
+          }
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(payments);
           }
         },
       );
@@ -108,6 +113,14 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
+  /// Locaux mis en attente (ancien locataire sorti, contrat clôturé).
+  Stream<List<Contract>> watchVacantContracts() {
+    return (select(contracts)
+          ..where((t) => t.archived.equals(true))
+          ..orderBy([(t) => OrderingTerm.asc(t.unitNumber)]))
+        .watch();
+  }
+
   Future<Contract?> getContractById(String id) {
     return (select(contracts)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
@@ -121,8 +134,68 @@ class AppDatabase extends _$AppDatabase {
     return (update(contracts)..where((t) => t.id.equals(id))).write(companion);
   }
 
+  /// Marque le contrat comme clôturé : le locataire est sorti, le local
+  /// passe en attente (vacant) jusqu'à un nouveau contrat.
+  Future<void> setContractVacant(String id, bool vacant) {
+    return (update(contracts)..where((t) => t.id.equals(id)))
+        .write(ContractsCompanion(archived: Value(vacant)));
+  }
+
   Future<void> deleteContract(String id) {
     return (delete(contracts)..where((t) => t.id.equals(id))).go();
+  }
+
+  // ---------- Paiements ----------
+  static DateTime monthKey(DateTime d) => DateTime(d.year, d.month, 1);
+
+  static String paymentId(String contractId, DateTime month) =>
+      '$contractId-${month.year}-${month.month.toString().padLeft(2, '0')}';
+
+  Stream<List<Payment>> watchPaymentsForContract(String contractId) {
+    return (select(payments)
+          ..where((t) => t.contractId.equals(contractId))
+          ..orderBy([(t) => OrderingTerm.desc(t.month)]))
+        .watch();
+  }
+
+  /// Enregistre (ou met à jour) le paiement d'un mois donné pour un contrat.
+  Future<void> markMonthPaid({
+    required String contractId,
+    required DateTime month,
+    required double amount,
+    required DateTime paidDate,
+    String notes = '',
+  }) {
+    final key = monthKey(month);
+    return into(payments).insertOnConflictUpdate(
+      PaymentsCompanion.insert(
+        id: paymentId(contractId, key),
+        contractId: contractId,
+        month: key,
+        amount: amount,
+        paidDate: paidDate,
+        notes: Value(notes),
+      ),
+    );
+  }
+
+  Future<void> markMonthUnpaid(String contractId, DateTime month) {
+    return (delete(payments)
+          ..where((t) => t.id.equals(paymentId(contractId, monthKey(month)))))
+        .go();
+  }
+
+  /// Contrats actifs à un moment donné pendant le mois (pour le rapport).
+  Future<List<Contract>> getContractsActiveDuring(DateTime monthStart, DateTime monthEnd) {
+    return (select(contracts)
+          ..where((t) => t.startDate.isSmallerOrEqualValue(monthEnd) &
+              t.endDate.isBiggerOrEqualValue(monthStart))
+          ..orderBy([(t) => OrderingTerm.asc(t.unitNumber)]))
+        .get();
+  }
+
+  Future<List<Payment>> getPaymentsForMonth(DateTime month) {
+    return (select(payments)..where((t) => t.month.equals(monthKey(month)))).get();
   }
 }
 

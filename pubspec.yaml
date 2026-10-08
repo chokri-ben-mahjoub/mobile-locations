@@ -44,6 +44,10 @@ dependencies:
   # Authentification locale
   local_auth: ^2.3.0
 
+  # Export PDF (rapport mensuel des loyers)
+  pdf: ^3.11.1
+  printing: ^5.13.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -28,3 +28,20 @@ class Contracts extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Paiement d'un loyer pour un mois donné. La présence d'une ligne pour
+/// un (contractId, month) donné signifie que ce mois a été payé.
+class Payments extends Table {
+  /// Id déterministe : "<contractId>-<year>-<month>".
+  TextColumn get id => text()();
+  TextColumn get contractId => text()();
+  /// Premier jour du mois concerné (ex: 2026-03-01).
+  DateTimeColumn get month => dateTime()();
+  RealColumn get amount => real()();
+  DateTimeColumn get paidDate => dateTime()();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

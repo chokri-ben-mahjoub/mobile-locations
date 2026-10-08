@@ -33,6 +33,19 @@ final contractsProvider = StreamProvider<List<Contract>>((ref) {
   return db.watchContracts();
 });
 
+/// Flux des locaux en attente (ancien locataire sorti).
+final vacantContractsProvider = StreamProvider<List<Contract>>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchVacantContracts();
+});
+
+/// Historique des paiements d'un contrat donné.
+final paymentsForContractProvider =
+    StreamProvider.family<List<Payment>, String>((ref, contractId) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchPaymentsForContract(contractId);
+});
+
 class OnboardingController {
   final AppDatabase db;
   OnboardingController(this.db);

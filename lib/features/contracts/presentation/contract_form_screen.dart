@@ -10,8 +10,15 @@ import '../application/contracts_providers.dart';
 /// Formulaire d'ajout (contractId == null) ou de modification d'un contrat.
 class ContractFormScreen extends ConsumerStatefulWidget {
   final String? contractId;
+  final String? prefillUnitNumber;
+  final String? replaceVacantId;
 
-  const ContractFormScreen({super.key, this.contractId});
+  const ContractFormScreen({
+    super.key,
+    this.contractId,
+    this.prefillUnitNumber,
+    this.replaceVacantId,
+  });
 
   @override
   ConsumerState<ContractFormScreen> createState() => _ContractFormScreenState();
@@ -32,6 +39,14 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
   bool _saving = false;
 
   bool get _isEditing => widget.contractId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefillUnitNumber != null) {
+      _unitNumberController.text = widget.prefillUnitNumber!;
+    }
+  }
 
   @override
   void dispose() {
@@ -106,6 +121,9 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
         sonedeMeter: sonede.isEmpty ? null : sonede,
         notes: _notesController.text.trim(),
       );
+      if (widget.replaceVacantId != null) {
+        await controller.delete(widget.replaceVacantId!);
+      }
     }
 
     if (!mounted) return;
@@ -122,7 +140,13 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Modifier le contrat' : 'Nouveau contrat')),
+      appBar: AppBar(
+        title: Text(_isEditing
+            ? 'Modifier le contrat'
+            : widget.prefillUnitNumber != null
+                ? 'Nouveau locataire — ${widget.prefillUnitNumber}'
+                : 'Nouveau contrat'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(

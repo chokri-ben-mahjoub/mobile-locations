@@ -60,9 +60,44 @@ class ContractsController {
     );
   }
 
+  /// Le locataire est sorti : clôture le contrat et met le local en attente.
+  Future<void> markVacant(String id) => db.setContractVacant(id, true);
+
+  /// Réactive un local précédemment mis en attente.
+  Future<void> reactivate(String id) => db.setContractVacant(id, false);
+
   Future<void> delete(String id) => db.deleteContract(id);
 }
 
 final contractsControllerProvider = Provider<ContractsController>((ref) {
   return ContractsController(ref.watch(appDatabaseProvider));
+});
+
+class PaymentsController {
+  final AppDatabase db;
+  PaymentsController(this.db);
+
+  Future<void> markPaid({
+    required String contractId,
+    required DateTime month,
+    required double amount,
+    required DateTime paidDate,
+    String notes = '',
+  }) {
+    return db.markMonthPaid(
+      contractId: contractId,
+      month: month,
+      amount: amount,
+      paidDate: paidDate,
+      notes: notes,
+    );
+  }
+
+  Future<void> markUnpaid(String contractId, DateTime month) {
+    return db.markMonthUnpaid(contractId, month);
+  }
+}
+
+final paymentsControllerProvider = Provider<PaymentsController>((ref) {
+  return PaymentsController(ref.watch(appDatabaseProvider));
 });

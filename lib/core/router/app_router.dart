@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -67,7 +66,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/contracts/new',
-        builder: (context, state) => const ContractFormScreen(),
+        builder: (context, state) => ContractFormScreen(
+          prefillUnitNumber: state.uri.queryParameters['unit'],
+          replaceVacantId: state.uri.queryParameters['replace'],
+        ),
       ),
       GoRoute(
         path: '/contracts/:id',
