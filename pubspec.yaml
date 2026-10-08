@@ -2,7 +2,7 @@ name: locations_app
 description: "LocaTrack - Gestion des contrats de location"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.2.1+4
 
 environment:
   sdk: ^3.13.3
@@ -44,13 +44,12 @@ dependencies:
   # Authentification locale
   local_auth: ^2.3.0
 
-  # Export PDF (rapport mensuel des loyers)
-  pdf: ^3.11.1
-  printing: ^5.13.4
-
   # Sauvegarde / restauration des données
   share_plus: ^10.1.4
   file_picker: ^10.3.3
+
+  # Pièces jointes (photos contrat, CIN, état des lieux...)
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

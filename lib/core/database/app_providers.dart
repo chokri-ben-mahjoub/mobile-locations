@@ -46,6 +46,20 @@ final paymentsForContractProvider =
   return db.watchPaymentsForContract(contractId);
 });
 
+/// Historique complet des contrats (actifs + en attente) d'un local donné.
+final contractsForUnitProvider =
+    StreamProvider.family<List<Contract>, String>((ref, unitNumber) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchContractsForUnit(unitNumber);
+});
+
+/// Pièces jointes d'un contrat donné.
+final attachmentsForContractProvider =
+    StreamProvider.family<List<Attachment>, String>((ref, contractId) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchAttachmentsForContract(contractId);
+});
+
 class OnboardingController {
   final AppDatabase db;
   OnboardingController(this.db);

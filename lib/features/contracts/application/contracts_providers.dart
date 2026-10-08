@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/attachments/attachment_service.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/id_generator.dart';
@@ -100,4 +101,8 @@ class PaymentsController {
 
 final paymentsControllerProvider = Provider<PaymentsController>((ref) {
   return PaymentsController(ref.watch(appDatabaseProvider));
+});
+
+final attachmentServiceProvider = Provider<AttachmentService>((ref) {
+  return AttachmentService(ref.watch(appDatabaseProvider));
 });

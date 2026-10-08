@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../core/attachments/attachment_service.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
@@ -71,41 +76,149 @@ class ContractDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () async {
-                      await ref.read(contractsControllerProvider).reactivate(c.id);
-                    },
+                    onPressed: () => _confirmReactivate(context, ref, c),
                     child: const Text('Réactiver'),
                   ),
                 ],
               ),
             ),
-          _InfoTile(label: 'Local', value: c.unitNumber),
-          _InfoTile(
-            label: 'Loyer mensuel',
-            value: FormatUtils.currency(c.monthlyAmount, currency),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [scheme.primary, Color.lerp(scheme.primary, Colors.black, 0.25)!],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: scheme.onPrimary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    c.unitNumber,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: scheme.onPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        c.tenantName,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: scheme.onPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        FormatUtils.currency(c.monthlyAmount, currency),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: scheme.onPrimary.withValues(alpha: 0.85),
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Historique de ce local',
+                  onPressed: () => context.push(
+                    '/units/${Uri.encodeComponent(c.unitNumber)}/history',
+                  ),
+                  icon: Icon(Icons.history_rounded, color: scheme.onPrimary.withValues(alpha: 0.9)),
+                ),
+              ],
+            ),
           ),
-          _InfoTile(
-            label: 'Début du contrat',
-            value: FormatUtils.shortDate.format(c.startDate),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              children: [
+                _InfoTile(
+                  icon: Icons.event_outlined,
+                  label: 'Début du contrat',
+                  value: FormatUtils.shortDate.format(c.startDate),
+                ),
+                _InfoTile(
+                  icon: Icons.event_busy_outlined,
+                  label: 'Fin du contrat',
+                  value: FormatUtils.shortDate.format(c.endDate),
+                ),
+                _InfoTile(
+                  icon: Icons.hourglass_bottom_rounded,
+                  label: 'Durée',
+                  value: FormatUtils.durationLabel(c.startDate, c.endDate),
+                ),
+                _InfoTile(
+                  icon: Icons.bolt_outlined,
+                  label: 'Compteur STEG',
+                  value: c.stegMeter ?? '—',
+                ),
+                _InfoTile(
+                  icon: Icons.water_drop_outlined,
+                  label: 'Compteur SONEDE',
+                  value: c.sonedeMeter ?? '—',
+                  isLast: true,
+                ),
+              ],
+            ),
           ),
-          _InfoTile(
-            label: 'Fin du contrat',
-            value: FormatUtils.shortDate.format(c.endDate),
-          ),
-          _InfoTile(
-            label: 'Durée',
-            value: FormatUtils.durationLabel(c.startDate, c.endDate),
-          ),
-          _InfoTile(label: 'Compteur STEG', value: c.stegMeter ?? '—'),
-          _InfoTile(label: 'Compteur SONEDE', value: c.sonedeMeter ?? '—'),
           if (c.notes.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text('Notes', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 4),
-            Text(c.notes, style: TextStyle(color: scheme.onSurfaceVariant)),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Notes',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(c.notes, style: TextStyle(color: scheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
           ],
           const SizedBox(height: 20),
           _PaymentsSection(contract: c, currency: currency),
+          const SizedBox(height: 24),
+          _AttachmentsSection(contractId: c.id),
           if (!c.archived) ...[
             const SizedBox(height: 24),
             SizedBox(
@@ -131,6 +244,32 @@ class ContractDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmReactivate(BuildContext context, WidgetRef ref, Contract c) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Réactiver ce contrat ?'),
+        content: Text(
+          'Le local ${c.unitNumber} redeviendra actif avec '
+          '${c.tenantName} comme locataire.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Réactiver'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(contractsControllerProvider).reactivate(c.id);
+    }
   }
 
   Future<void> _confirmMarkVacant(BuildContext context, WidgetRef ref, Contract c) async {
@@ -512,23 +651,310 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
 }
 
 class _InfoTile extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
+  final bool isLast;
 
-  const _InfoTile({required this.label, required this.value});
+  const _InfoTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.isLast = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: isLast
+          ? null
+          : BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.15)),
+              ),
+            ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
+          Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
+          ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );
+  }
+}
+
+class _AttachmentsSection extends ConsumerWidget {
+  final String contractId;
+
+  const _AttachmentsSection({required this.contractId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final attachments =
+        ref.watch(attachmentsForContractProvider(contractId)).valueOrNull ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Pièces jointes', style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                )),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () => _showAddSheet(context, ref),
+              icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+              label: const Text('Ajouter'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (attachments.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.photo_library_outlined, color: scheme.onSurfaceVariant, size: 28),
+                const SizedBox(height: 8),
+                Text(
+                  'Aucune pièce jointe. Ajoutez une photo du contrat, de la CIN\n'
+                  'ou de l\'état des lieux.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          )
+        else
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final attachment in attachments)
+                _AttachmentThumb(
+                  attachment: attachment,
+                  onTap: () => _openViewer(context, ref, attachment),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
+    final category = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                'Type de document',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+            for (final entry in attachmentCategoryLabels.entries)
+              ListTile(
+                leading: Icon(_categoryIcon(entry.key)),
+                title: Text(entry.value),
+                onTap: () => Navigator.pop(context, entry.key),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (category == null || !context.mounted) return;
+
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Prendre une photo'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_outlined),
+              title: const Text('Choisir depuis la galerie'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final service = ref.read(attachmentServiceProvider);
+    await service.captureAndSave(contractId: contractId, category: category, source: source);
+  }
+
+  Future<void> _openViewer(BuildContext context, WidgetRef ref, Attachment attachment) async {
+    await showDialog(
+      context: context,
+      builder: (context) => _AttachmentViewer(attachment: attachment),
+    );
+  }
+
+  IconData _categoryIcon(String category) {
+    switch (category) {
+      case 'contrat':
+        return Icons.description_outlined;
+      case 'cin':
+        return Icons.badge_outlined;
+      case 'etat_lieux':
+        return Icons.home_work_outlined;
+      default:
+        return Icons.attach_file_rounded;
+    }
+  }
+}
+
+class _AttachmentThumb extends StatelessWidget {
+  final Attachment attachment;
+  final VoidCallback onTap;
+
+  const _AttachmentThumb({required this.attachment, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(
+              File(attachment.filePath),
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stack) => Container(
+                width: 80,
+                height: 80,
+                color: scheme.surfaceContainerHigh,
+                child: Icon(Icons.broken_image_outlined, color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: 80,
+            child: Text(
+              attachmentCategoryLabels[attachment.category] ?? 'Autre',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttachmentViewer extends ConsumerWidget {
+  final Attachment attachment;
+
+  const _AttachmentViewer({required this.attachment});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Dialog.fullscreen(
+      backgroundColor: Colors.black,
+      child: SafeArea(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const Spacer(),
+                Text(
+                  attachmentCategoryLabels[attachment.category] ?? 'Autre',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined, color: Colors.white),
+                  onPressed: () => Share.shareXFiles([XFile(attachment.filePath)]),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.white),
+                  onPressed: () => _confirmDeleteAttachment(context, ref, attachment),
+                ),
+              ],
+            ),
+            Expanded(
+              child: InteractiveViewer(
+                child: Center(
+                  child: Image.file(File(attachment.filePath)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteAttachment(
+    BuildContext context,
+    WidgetRef ref,
+    Attachment attachment,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer cette pièce jointe ?'),
+        content: const Text('Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(attachmentServiceProvider).delete(attachment);
+      if (context.mounted) Navigator.pop(context);
+    }
   }
 }

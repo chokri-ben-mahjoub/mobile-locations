@@ -63,13 +63,13 @@ ContractsCompanion _seed(
   );
 }
 
-@DriftDatabase(tables: [AppSettings, Contracts, Payments])
+@DriftDatabase(tables: [AppSettings, Contracts, Payments, Attachments])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,6 +83,9 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             await m.createTable(payments);
+          }
+          if (from < 3) {
+            await m.createTable(attachments);
           }
         },
       );
@@ -185,17 +188,44 @@ class AppDatabase extends _$AppDatabase {
         .go();
   }
 
-  /// Contrats actifs à un moment donné pendant le mois (pour le rapport).
-  Future<List<Contract>> getContractsActiveDuring(DateTime monthStart, DateTime monthEnd) {
+  /// Tous les contrats (actifs et en attente) qui ont occupé ce local,
+  /// du plus récent au plus ancien — pour l'historique d'un local.
+  Stream<List<Contract>> watchContractsForUnit(String unitNumber) {
     return (select(contracts)
-          ..where((t) => t.startDate.isSmallerOrEqualValue(monthEnd) &
-              t.endDate.isBiggerOrEqualValue(monthStart))
-          ..orderBy([(t) => OrderingTerm.asc(t.unitNumber)]))
-        .get();
+          ..where((t) => t.unitNumber.equals(unitNumber))
+          ..orderBy([(t) => OrderingTerm.desc(t.startDate)]))
+        .watch();
   }
 
-  Future<List<Payment>> getPaymentsForMonth(DateTime month) {
-    return (select(payments)..where((t) => t.month.equals(monthKey(month)))).get();
+  // ---------- Pièces jointes ----------
+  Stream<List<Attachment>> watchAttachmentsForContract(String contractId) {
+    return (select(attachments)
+          ..where((t) => t.contractId.equals(contractId))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .watch();
+  }
+
+  Future<void> addAttachment({
+    required String contractId,
+    required String category,
+    required String filePath,
+  }) {
+    return into(attachments).insert(
+      AttachmentsCompanion.insert(
+        id: newId(),
+        contractId: contractId,
+        category: category,
+        filePath: filePath,
+      ),
+    );
+  }
+
+  Future<Attachment?> getAttachment(String id) {
+    return (select(attachments)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<void> deleteAttachment(String id) {
+    return (delete(attachments)..where((t) => t.id.equals(id))).go();
   }
 
   // ---------- Sauvegarde / restauration ----------

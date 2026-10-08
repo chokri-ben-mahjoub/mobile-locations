@@ -152,65 +152,107 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            TextFormField(
-              controller: _tenantNameController,
-              decoration: const InputDecoration(labelText: 'Nom du locataire'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
-            ),
-            const SizedBox(height: 14),
-            TextFormField(
-              controller: _unitNumberController,
-              decoration: const InputDecoration(labelText: 'Numéro de local (ex: A1-1)'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
-            ),
-            const SizedBox(height: 14),
-            Row(
+            _FormSection(
+              icon: Icons.person_outline_rounded,
+              title: 'Locataire & local',
               children: [
-                Expanded(
-                  child: _DatePickerField(
-                    label: 'Date de début',
-                    value: _startDate,
-                    onTap: () => _pickDate(isStart: true),
+                TextFormField(
+                  controller: _tenantNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nom du locataire',
+                    prefixIcon: Icon(Icons.badge_outlined),
                   ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _DatePickerField(
-                    label: 'Date de fin',
-                    value: _endDate,
-                    onTap: () => _pickDate(isStart: false),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _unitNumberController,
+                  decoration: const InputDecoration(
+                    labelText: 'Numéro de local (ex: A1-1)',
+                    prefixIcon: Icon(Icons.door_front_door_outlined),
                   ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            TextFormField(
-              controller: _amountController,
-              decoration: const InputDecoration(labelText: 'Loyer mensuel (TND)'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Champ requis';
-                if (double.tryParse(v.trim()) == null) return 'Montant invalide';
-                return null;
-              },
+            const SizedBox(height: 16),
+            _FormSection(
+              icon: Icons.event_outlined,
+              title: 'Durée du contrat',
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _DatePickerField(
+                        label: 'Date de début',
+                        value: _startDate,
+                        onTap: () => _pickDate(isStart: true),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _DatePickerField(
+                        label: 'Date de fin',
+                        value: _endDate,
+                        onTap: () => _pickDate(isStart: false),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            TextFormField(
-              controller: _stegController,
-              decoration: const InputDecoration(labelText: 'Compteur STEG (optionnel)'),
-              keyboardType: TextInputType.number,
+            const SizedBox(height: 16),
+            _FormSection(
+              icon: Icons.payments_outlined,
+              title: 'Loyer & compteurs',
+              children: [
+                TextFormField(
+                  controller: _amountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Loyer mensuel (TND)',
+                    prefixIcon: Icon(Icons.payments_outlined),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Champ requis';
+                    if (double.tryParse(v.trim()) == null) return 'Montant invalide';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _stegController,
+                  decoration: const InputDecoration(
+                    labelText: 'Compteur STEG (optionnel)',
+                    prefixIcon: Icon(Icons.bolt_outlined),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _sonedeController,
+                  decoration: const InputDecoration(
+                    labelText: 'Compteur SONEDE (optionnel)',
+                    prefixIcon: Icon(Icons.water_drop_outlined),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            TextFormField(
-              controller: _sonedeController,
-              decoration: const InputDecoration(labelText: 'Compteur SONEDE (optionnel)'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 14),
-            TextFormField(
-              controller: _notesController,
-              decoration: const InputDecoration(labelText: 'Notes (optionnel)'),
-              maxLines: 3,
+            const SizedBox(height: 16),
+            _FormSection(
+              icon: Icons.notes_rounded,
+              title: 'Notes',
+              children: [
+                TextFormField(
+                  controller: _notesController,
+                  decoration: const InputDecoration(
+                    labelText: 'Notes (optionnel)',
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 3,
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -247,8 +289,74 @@ class _DatePickerField extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: InputDecorator(
-        decoration: InputDecoration(labelText: label),
-        child: Text(FormatUtils.shortDate.format(value)),
+        decoration: const InputDecoration(
+          prefixIcon: Icon(Icons.calendar_today_outlined, size: 18),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              FormatUtils.shortDate.format(value),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FormSection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final List<Widget> children;
+
+  const _FormSection({required this.icon, required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: scheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 16, color: scheme.primary),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...children,
+        ],
       ),
     );
   }

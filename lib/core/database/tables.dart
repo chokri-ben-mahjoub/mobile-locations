@@ -45,3 +45,17 @@ class Payments extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Pièce jointe (photo) liée à un contrat : contrat signé, CIN du
+/// locataire, état des lieux, etc.
+class Attachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get contractId => text()();
+  /// 'contrat' | 'cin' | 'etat_lieux' | 'autre'
+  TextColumn get category => text()();
+  TextColumn get filePath => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

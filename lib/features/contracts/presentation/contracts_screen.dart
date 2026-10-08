@@ -11,6 +11,8 @@ import '../application/contracts_providers.dart';
 
 enum ContractUrgency { expired, dueSoon, active }
 
+enum ContractSortOption { expiryAsc, rentDesc, rentAsc, nameAsc }
+
 ContractUrgency contractUrgency(Contract c, int reminderLeadMonths, DateTime now) {
   if (!c.endDate.isAfter(now)) return ContractUrgency.expired;
   final reminderDate = DateTime(
@@ -32,6 +34,8 @@ class ContractsScreen extends ConsumerStatefulWidget {
 class _ContractsScreenState extends ConsumerState<ContractsScreen> {
   final _searchController = TextEditingController();
   String _query = '';
+  ContractUrgency? _statusFilter;
+  ContractSortOption _sortBy = ContractSortOption.expiryAsc;
 
   @override
   void dispose() {
@@ -66,12 +70,39 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
               .length;
 
           final q = _query.trim().toLowerCase();
-          final filtered = q.isEmpty
-              ? contracts
+          var filtered = q.isEmpty
+              ? List<Contract>.from(contracts)
               : contracts
                   .where((c) =>
                       c.tenantName.toLowerCase().contains(q) ||
                       c.unitNumber.toLowerCase().contains(q))
+                  .toList();
+
+          if (_statusFilter != null) {
+            filtered = filtered
+                .where((c) => contractUrgency(c, reminderLeadMonths, now) == _statusFilter)
+                .toList();
+          }
+
+          filtered.sort((a, b) {
+            switch (_sortBy) {
+              case ContractSortOption.expiryAsc:
+                return a.endDate.compareTo(b.endDate);
+              case ContractSortOption.rentDesc:
+                return b.monthlyAmount.compareTo(a.monthlyAmount);
+              case ContractSortOption.rentAsc:
+                return a.monthlyAmount.compareTo(b.monthlyAmount);
+              case ContractSortOption.nameAsc:
+                return a.tenantName.compareTo(b.tenantName);
+            }
+          });
+
+          final filteredVacant = q.isEmpty
+              ? vacantUnits
+              : vacantUnits
+                  .where((u) =>
+                      u.tenantName.toLowerCase().contains(q) ||
+                      u.unitNumber.toLowerCase().contains(q))
                   .toList();
 
           return ListView(
@@ -231,12 +262,89 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                 ),
                 onChanged: (v) => setState(() => _query = v),
               ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Tous'),
+                            selected: _statusFilter == null,
+                            onSelected: (_) => setState(() => _statusFilter = null),
+                          ),
+                          const SizedBox(width: 8),
+                          ChoiceChip(
+                            label: const Text('Actifs'),
+                            selected: _statusFilter == ContractUrgency.active,
+                            onSelected: (_) =>
+                                setState(() => _statusFilter = ContractUrgency.active),
+                          ),
+                          const SizedBox(width: 8),
+                          ChoiceChip(
+                            label: const Text('Expire bientôt'),
+                            selected: _statusFilter == ContractUrgency.dueSoon,
+                            onSelected: (_) =>
+                                setState(() => _statusFilter = ContractUrgency.dueSoon),
+                          ),
+                          const SizedBox(width: 8),
+                          ChoiceChip(
+                            label: const Text('Expiré'),
+                            selected: _statusFilter == ContractUrgency.expired,
+                            onSelected: (_) =>
+                                setState(() => _statusFilter = ContractUrgency.expired),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  PopupMenuButton<ContractSortOption>(
+                    tooltip: 'Trier',
+                    initialValue: _sortBy,
+                    onSelected: (v) => setState(() => _sortBy = v),
+                    icon: Icon(Icons.sort_rounded, color: scheme.onSurfaceVariant),
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: ContractSortOption.expiryAsc,
+                        child: Text('Date d\'expiration'),
+                      ),
+                      PopupMenuItem(
+                        value: ContractSortOption.rentDesc,
+                        child: Text('Loyer (décroissant)'),
+                      ),
+                      PopupMenuItem(
+                        value: ContractSortOption.rentAsc,
+                        child: Text('Loyer (croissant)'),
+                      ),
+                      PopupMenuItem(
+                        value: ContractSortOption.nameAsc,
+                        child: Text('Nom (A→Z)'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
-              if (filtered.isEmpty)
-                const EmptyState(
+              if (filtered.isEmpty && filteredVacant.isEmpty)
+                EmptyState(
                   icon: Icons.inbox_outlined,
-                  title: 'Aucun contrat',
-                  subtitle: 'Ajoutez votre premier contrat avec le bouton +.',
+                  title: q.isEmpty ? 'Aucun contrat' : 'Aucun résultat',
+                  subtitle: q.isEmpty
+                      ? 'Ajoutez votre premier contrat avec le bouton +.'
+                      : 'Aucun contrat ni local en attente ne correspond à « $q ».',
+                )
+              else if (filtered.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Aucun contrat actif ne correspond à cette recherche.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                  ),
                 )
               else
                 for (final (index, contract) in filtered.indexed)
@@ -259,9 +367,9 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                       onTap: () => context.push('/contracts/${contract.id}'),
                     ),
                   ),
-              if (vacantUnits.isNotEmpty) ...[
+              if (filteredVacant.isNotEmpty) ...[
                 const SizedBox(height: 24),
-                _VacantUnitsSection(units: vacantUnits),
+                _VacantUnitsSection(units: filteredVacant),
               ],
             ],
           );
@@ -271,7 +379,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
   }
 }
 
-class _ContractCard extends StatelessWidget {
+class _ContractCard extends ConsumerWidget {
   final Contract contract;
   final String currency;
   final ContractUrgency urgency;
@@ -296,9 +404,14 @@ class _ContractCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final (badgeColor, badgeLabel) = _badge;
+
+    final now = DateTime.now();
+    final currentMonthKey = DateTime(now.year, now.month, 1);
+    final payments = ref.watch(paymentsForContractProvider(contract.id)).valueOrNull ?? [];
+    final paidThisMonth = payments.any((p) => p.month == currentMonthKey);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -322,30 +435,58 @@ class _ContractCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        scheme.primary.withValues(alpha: 0.18),
-                        scheme.primary.withValues(alpha: 0.08),
-                      ],
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            scheme.primary.withValues(alpha: 0.18),
+                            scheme.primary.withValues(alpha: 0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        contract.unitNumber,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.primary,
+                        ),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Text(
-                    contract.unitNumber,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.primary,
+                    Positioned(
+                      right: -4,
+                      top: -4,
+                      child: Tooltip(
+                        message: paidThisMonth
+                            ? 'Loyer de ce mois payé'
+                            : 'Loyer de ce mois impayé',
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: paidThisMonth ? Colors.green : scheme.error,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: scheme.surfaceContainerLow, width: 2),
+                          ),
+                          child: Icon(
+                            paidThisMonth ? Icons.check_rounded : Icons.priority_high_rounded,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -437,88 +578,122 @@ class _VacantUnitsSection extends ConsumerWidget {
         for (final unit in units)
           Container(
             margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: scheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: scheme.outlineVariant.withValues(alpha: 0.3),
-                style: BorderStyle.solid,
               ),
             ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: scheme.onSurfaceVariant.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: Text(
-                        unit.unitNumber,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(18),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () => context.push('/contracts/${unit.id}'),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          Text(
-                            'En attente',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          Container(
+                            width: 44,
+                            height: 44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: scheme.onSurfaceVariant.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: Text(
+                              unit.unitNumber,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
                           ),
-                          Text(
-                            'Dernier locataire : ${unit.tenantName}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurfaceVariant,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'En attente',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
+                                Text(
+                                  'Dernier locataire : ${unit.tenantName}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Réactiver ce contrat',
+                            icon: Icon(Icons.restart_alt_rounded, color: scheme.onSurfaceVariant),
+                            onPressed: () => _confirmReactivate(context, ref, unit),
                           ),
                         ],
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Réactiver ce contrat',
-                      icon: Icon(Icons.restart_alt_rounded, color: scheme.onSurfaceVariant),
-                      onPressed: () =>
-                          ref.read(contractsControllerProvider).reactivate(unit.id),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 42,
-                  child: FilledButton.tonalIcon(
-                    onPressed: () => context.push(
-                      '/contracts/new'
-                      '?unit=${Uri.encodeComponent(unit.unitNumber)}'
-                      '&replace=${unit.id}',
-                    ),
-                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                    label: const Text(
-                      'Nouveau locataire',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 42,
+                        child: FilledButton.tonalIcon(
+                          onPressed: () => context.push(
+                            '/contracts/new'
+                            '?unit=${Uri.encodeComponent(unit.unitNumber)}'
+                            '&replace=${unit.id}',
+                          ),
+                          icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                          label: const Text(
+                            'Nouveau locataire',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
       ],
     );
+  }
+
+  Future<void> _confirmReactivate(BuildContext context, WidgetRef ref, Contract unit) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Réactiver ce contrat ?'),
+        content: Text(
+          'Le local ${unit.unitNumber} redeviendra actif avec '
+          '${unit.tenantName} comme locataire, comme avant sa mise en attente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Réactiver'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(contractsControllerProvider).reactivate(unit.id);
+    }
   }
 }

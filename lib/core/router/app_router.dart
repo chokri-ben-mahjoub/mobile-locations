@@ -7,6 +7,7 @@ import '../../features/auth/presentation/passcode_screen.dart';
 import '../../features/contracts/presentation/contract_detail_screen.dart';
 import '../../features/contracts/presentation/contract_form_screen.dart';
 import '../../features/contracts/presentation/contracts_screen.dart';
+import '../../features/contracts/presentation/unit_history_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../auth/auth_providers.dart';
 import '../database/app_providers.dart';
@@ -80,6 +81,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/contracts/:id/edit',
         builder: (context, state) =>
             ContractFormScreen(contractId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/units/:unit/history',
+        builder: (context, state) =>
+            UnitHistoryScreen(unitNumber: state.pathParameters['unit']!),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
