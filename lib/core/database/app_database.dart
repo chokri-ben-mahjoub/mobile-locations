@@ -197,6 +197,30 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Payment>> getPaymentsForMonth(DateTime month) {
     return (select(payments)..where((t) => t.month.equals(monthKey(month)))).get();
   }
+
+  // ---------- Sauvegarde / restauration ----------
+  Future<List<Contract>> getAllContracts() => select(contracts).get();
+
+  Future<List<Payment>> getAllPayments() => select(payments).get();
+
+  /// Remplace toutes les données existantes par celles d'une sauvegarde.
+  Future<void> restoreAll({
+    required AppSettingsCompanion settings,
+    required List<ContractsCompanion> contractRows,
+    required List<PaymentsCompanion> paymentRows,
+  }) {
+    return transaction(() async {
+      await delete(payments).go();
+      await delete(contracts).go();
+      await updateSettings(settings);
+      for (final row in contractRows) {
+        await into(contracts).insertOnConflictUpdate(row);
+      }
+      for (final row in paymentRows) {
+        await into(payments).insertOnConflictUpdate(row);
+      }
+    });
+  }
 }
 
 LazyDatabase _openConnection() {

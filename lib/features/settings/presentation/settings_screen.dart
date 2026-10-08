@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
+import '../../../core/backup/backup_service.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/pdf/rent_report_pdf.dart';
@@ -95,6 +99,8 @@ class SettingsScreen extends ConsumerWidget {
           const _SecuritySection(),
           const SizedBox(height: 16),
           const _ReportsSection(),
+          const SizedBox(height: 16),
+          const _BackupSection(),
           const SizedBox(height: 16),
           _SectionCard(
             title: 'À propos',
@@ -290,6 +296,146 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
         ),
       ],
     );
+  }
+}
+
+class _BackupSection extends ConsumerStatefulWidget {
+  const _BackupSection();
+
+  @override
+  ConsumerState<_BackupSection> createState() => _BackupSectionState();
+}
+
+class _BackupSectionState extends ConsumerState<_BackupSection> {
+  bool _exporting = false;
+  bool _restoring = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return _SectionCard(
+      title: 'Sauvegarde',
+      children: [
+        Text(
+          'Les données sont stockées uniquement sur cet appareil. '
+          'Exportez une sauvegarde régulièrement pour ne rien perdre en cas '
+          'de changement de téléphone.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: _exporting ? null : _export,
+            icon: _exporting
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.upload_outlined),
+            label: const Text(
+              'Exporter une sauvegarde',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: _restoring ? null : _restore,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: scheme.error,
+              side: BorderSide(color: scheme.error.withValues(alpha: 0.4)),
+            ),
+            icon: _restoring
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.download_outlined),
+            label: const Text(
+              'Restaurer une sauvegarde',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _export() async {
+    setState(() => _exporting = true);
+    try {
+      final service = BackupService(ref.read(appDatabaseProvider));
+      await service.shareBackup();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'export : $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  Future<void> _restore() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    final path = result?.files.single.path;
+    if (path == null || !mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restaurer cette sauvegarde ?'),
+        content: const Text(
+          'Tous les contrats, paiements et réglages actuels seront '
+          'remplacés par le contenu de ce fichier. Cette action est '
+          'irréversible.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Restaurer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _restoring = true);
+    try {
+      final service = BackupService(ref.read(appDatabaseProvider));
+      await service.restoreFromFile(File(path));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sauvegarde restaurée avec succès.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de la restauration : $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _restoring = false);
+    }
   }
 }
 

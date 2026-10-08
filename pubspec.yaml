@@ -48,6 +48,10 @@ dependencies:
   pdf: ^3.11.1
   printing: ^5.13.4
 
+  # Sauvegarde / restauration des données
+  share_plus: ^10.1.4
+  file_picker: ^10.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
