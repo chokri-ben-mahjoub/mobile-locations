@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,7 +11,73 @@ import '../../../core/attachments/attachment_service.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/receipt.dart';
+import '../../../core/widgets/aurora_card.dart';
+import '../../../core/widgets/charts.dart';
+import '../../../core/widgets/pressable.dart';
 import '../application/contracts_providers.dart';
+
+class _LifetimeBar extends StatelessWidget {
+  final Contract contract;
+
+  const _LifetimeBar({required this.contract});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final total = contract.endDate.difference(contract.startDate).inHours;
+    final elapsed = now.difference(contract.startDate).inHours;
+    final progress = total <= 0 ? 1.0 : (elapsed / total).clamp(0.0, 1.0);
+    final daysLeft = contract.endDate.difference(now).inDays;
+    final expired = !contract.endDate.isAfter(now);
+    final label = expired
+        ? 'Contrat arrivé à échéance'
+        : daysLeft > 60
+        ? 'Encore ${(daysLeft / 30).round()} mois'
+        : 'Encore $daysLeft jour${daysLeft > 1 ? 's' : ''}';
+
+    return Column(
+      children: [
+        ThinProgress(
+          value: progress,
+          color: Colors.white,
+          track: Colors.white.withValues(alpha: 0.2),
+          height: 6,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Text(
+              FormatUtils.shortDate.format(contract.startDate),
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              FormatUtils.shortDate.format(contract.endDate),
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
 
 class ContractDetailScreen extends ConsumerWidget {
   final String contractId;
@@ -64,7 +131,10 @@ class ContractDetailScreen extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.hourglass_empty_rounded, color: scheme.onSurfaceVariant),
+                  Icon(
+                    Icons.hourglass_empty_rounded,
+                    color: scheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -82,72 +152,69 @@ class ContractDetailScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          Container(
+          AuroraCard(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [scheme.primary, Color.lerp(scheme.primary, Colors.black, 0.25)!],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: scheme.primary.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
+            radius: 28,
+            child: Column(
               children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: scheme.onPrimary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    c.unitNumber,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onPrimary,
+                Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        c.unitNumber,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        c.tenantName,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: scheme.onPrimary,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            c.tenantName,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            FormatUtils.currency(c.monthlyAmount, currency),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        FormatUtils.currency(c.monthlyAmount, currency),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: scheme.onPrimary.withValues(alpha: 0.85),
-                            ),
+                    ),
+                    IconButton(
+                      tooltip: 'Historique de ce local',
+                      onPressed: () => context.push(
+                        '/units/${Uri.encodeComponent(c.unitNumber)}/history',
                       ),
-                    ],
-                  ),
+                      icon: Icon(
+                        Icons.history_rounded,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  tooltip: 'Historique de ce local',
-                  onPressed: () => context.push(
-                    '/units/${Uri.encodeComponent(c.unitNumber)}/history',
-                  ),
-                  icon: Icon(Icons.history_rounded, color: scheme.onPrimary.withValues(alpha: 0.9)),
-                ),
+                const SizedBox(height: 18),
+                _LifetimeBar(contract: c),
               ],
             ),
           ),
@@ -157,7 +224,9 @@ class ContractDetailScreen extends ConsumerWidget {
             decoration: BoxDecoration(
               color: scheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               children: [
@@ -198,19 +267,23 @@ class ContractDetailScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: 0.2),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Notes',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 6),
-                  Text(c.notes, style: TextStyle(color: scheme.onSurfaceVariant)),
+                  Text(
+                    c.notes,
+                    style: TextStyle(color: scheme.onSurfaceVariant),
+                  ),
                 ],
               ),
             ),
@@ -246,7 +319,11 @@ class ContractDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmReactivate(BuildContext context, WidgetRef ref, Contract c) async {
+  Future<void> _confirmReactivate(
+    BuildContext context,
+    WidgetRef ref,
+    Contract c,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -272,7 +349,11 @@ class ContractDetailScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _confirmMarkVacant(BuildContext context, WidgetRef ref, Contract c) async {
+  Future<void> _confirmMarkVacant(
+    BuildContext context,
+    WidgetRef ref,
+    Contract c,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -331,7 +412,11 @@ class ContractDetailScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, String id) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -388,7 +473,11 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final payments = ref.watch(paymentsForContractProvider(widget.contract.id)).valueOrNull ?? [];
+    final payments =
+        ref
+            .watch(paymentsForContractProvider(widget.contract.id))
+            .valueOrNull ??
+        [];
     final byMonth = {for (final p in payments) p.month: p};
 
     final months = _months();
@@ -400,22 +489,23 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
       children: [
         Row(
           children: [
-            Text('Historique des paiements', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              'Historique des paiements',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const Spacer(),
             Text(
               '$paidCount/${months.length} payés',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
           'Touchez un mois pour basculer payé/impayé. Appui long pour corriger le montant.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: scheme.onSurfaceVariant),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -434,7 +524,11 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
         if (months.length > 6)
           TextButton(
             onPressed: () => setState(() => _expanded = !_expanded),
-            child: Text(_expanded ? 'Réduire' : 'Afficher tous les mois (${months.length})'),
+            child: Text(
+              _expanded
+                  ? 'Réduire'
+                  : 'Afficher tous les mois (${months.length})',
+            ),
           ),
       ],
     );
@@ -444,19 +538,54 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
   /// ou impayé, sans passer par un formulaire.
   Future<void> _toggleMonth(DateTime month, Payment? existing) async {
     final controller = ref.read(paymentsControllerProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final label = FormatUtils.monthYear.format(month);
     if (existing != null) {
+      HapticFeedback.lightImpact();
       await controller.markUnpaid(widget.contract.id, month);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('Paiement de $label annulé'),
+            action: SnackBarAction(
+              label: 'Rétablir',
+              onPressed: () => controller.markPaid(
+                contractId: existing.contractId,
+                month: month,
+                amount: existing.amount,
+                paidDate: existing.paidDate,
+              ),
+            ),
+          ),
+        );
     } else {
+      HapticFeedback.heavyImpact();
       await controller.markPaid(
         contractId: widget.contract.id,
         month: month,
         amount: widget.contract.monthlyAmount,
         paidDate: DateTime.now(),
       );
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('$label encaissé'),
+            action: SnackBarAction(
+              label: 'Annuler',
+              onPressed: () => controller.markUnpaid(widget.contract.id, month),
+            ),
+          ),
+        );
     }
   }
 
-  Future<void> _editMonth(BuildContext context, DateTime month, Payment? existing) async {
+  Future<void> _editMonth(
+    BuildContext context,
+    DateTime month,
+    Payment? existing,
+  ) async {
     final result = await showModalBottomSheet<_PaymentAction>(
       context: context,
       showDragHandle: true,
@@ -464,6 +593,8 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
         month: month,
         existing: existing,
         defaultAmount: widget.contract.monthlyAmount,
+        contract: widget.contract,
+        currency: widget.currency,
       ),
     );
     if (result == null) return;
@@ -497,20 +628,25 @@ class _MonthChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final label = FormatUtils.dayMonth.format(month).replaceFirst(RegExp(r'^\d+ '), '');
+    final label = FormatUtils.dayMonth
+        .format(month)
+        .replaceFirst(RegExp(r'^\d+ '), '');
     final isCurrentMonth =
-        DateTime.now().year == month.year && DateTime.now().month == month.month;
+        DateTime.now().year == month.year &&
+        DateTime.now().month == month.month;
 
-    return InkWell(
+    return Pressable(
       onTap: onTap,
       onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
+      pressedScale: 0.92,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
         width: 72,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: paid
-              ? Colors.green.withValues(alpha: 0.15)
+              ? okColor.withValues(alpha: 0.16)
               : scheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
@@ -522,10 +658,17 @@ class _MonthChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(
-              paid ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-              size: 18,
-              color: paid ? Colors.green.shade700 : scheme.onSurfaceVariant,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 260),
+              transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+              child: Icon(
+                paid
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                key: ValueKey(paid),
+                size: 18,
+                color: paid ? okColor : scheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -533,7 +676,7 @@ class _MonthChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: paid ? Colors.green.shade700 : scheme.onSurfaceVariant,
+                color: paid ? okColor : scheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -549,21 +692,22 @@ class _PaymentAction {
   final DateTime? paidDate;
 
   _PaymentAction.paid(this.amount, this.paidDate) : markPaid = true;
-  _PaymentAction.unpaid()
-      : markPaid = false,
-        amount = null,
-        paidDate = null;
+  _PaymentAction.unpaid() : markPaid = false, amount = null, paidDate = null;
 }
 
 class _PaymentActionSheet extends StatefulWidget {
   final DateTime month;
   final Payment? existing;
   final double defaultAmount;
+  final Contract contract;
+  final String currency;
 
   const _PaymentActionSheet({
     required this.month,
     required this.existing,
     required this.defaultAmount,
+    required this.contract,
+    required this.currency,
   });
 
   @override
@@ -587,7 +731,10 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
     final label = FormatUtils.monthYear.format(widget.month);
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        20, 4, 20, MediaQuery.of(context).viewInsets.bottom + 20,
+        20,
+        4,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 20,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -595,7 +742,8 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
         children: [
           Text(
             label[0].toUpperCase() + label.substring(1),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -638,8 +786,30 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
             SizedBox(
               width: double.infinity,
               height: 48,
+              child: FilledButton.tonalIcon(
+                onPressed: () {
+                  final p = widget.existing!;
+                  Share.share(
+                    buildReceiptText(
+                      contract: widget.contract,
+                      month: widget.month,
+                      amount: p.amount,
+                      paidDate: p.paidDate,
+                      currency: widget.currency,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                label: const Text('Partager la quittance'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
               child: OutlinedButton(
-                onPressed: () => Navigator.pop(context, _PaymentAction.unpaid()),
+                onPressed: () =>
+                    Navigator.pop(context, _PaymentAction.unpaid()),
                 child: const Text('Annuler ce paiement'),
               ),
             ),
@@ -672,7 +842,9 @@ class _InfoTile extends StatelessWidget {
           ? null
           : BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.15)),
+                bottom: BorderSide(
+                  color: scheme.outlineVariant.withValues(alpha: 0.15),
+                ),
               ),
             ),
       child: Row(
@@ -680,7 +852,10 @@ class _InfoTile extends StatelessWidget {
           Icon(icon, size: 18, color: scheme.onSurfaceVariant),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(label, style: TextStyle(color: scheme.onSurfaceVariant)),
+            child: Text(
+              label,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
           ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
@@ -705,9 +880,11 @@ class _AttachmentsSection extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Text('Pièces jointes', style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                )),
+            Text(
+              'Pièces jointes',
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const Spacer(),
             TextButton.icon(
               onPressed: () => _showAddSheet(context, ref),
@@ -724,19 +901,24 @@ class _AttachmentsSection extends ConsumerWidget {
             decoration: BoxDecoration(
               color: scheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               children: [
-                Icon(Icons.photo_library_outlined, color: scheme.onSurfaceVariant, size: 28),
+                Icon(
+                  Icons.photo_library_outlined,
+                  color: scheme.onSurfaceVariant,
+                  size: 28,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Aucune pièce jointe. Ajoutez une photo du contrat, de la CIN\n'
                   'ou de l\'état des lieux.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -769,9 +951,8 @@ class _AttachmentsSection extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(
                 'Type de document',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
             for (final entry in attachmentCategoryLabels.entries)
@@ -810,10 +991,18 @@ class _AttachmentsSection extends ConsumerWidget {
     if (source == null) return;
 
     final service = ref.read(attachmentServiceProvider);
-    await service.captureAndSave(contractId: contractId, category: category, source: source);
+    await service.captureAndSave(
+      contractId: contractId,
+      category: category,
+      source: source,
+    );
   }
 
-  Future<void> _openViewer(BuildContext context, WidgetRef ref, Attachment attachment) async {
+  Future<void> _openViewer(
+    BuildContext context,
+    WidgetRef ref,
+    Attachment attachment,
+  ) async {
     await showDialog(
       context: context,
       builder: (context) => _AttachmentViewer(attachment: attachment),
@@ -860,7 +1049,10 @@ class _AttachmentThumb extends StatelessWidget {
                 width: 80,
                 height: 80,
                 color: scheme.surfaceContainerHigh,
-                child: Icon(Icons.broken_image_outlined, color: scheme.onSurfaceVariant),
+                child: Icon(
+                  Icons.broken_image_outlined,
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -872,9 +1064,8 @@ class _AttachmentThumb extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: scheme.onSurfaceVariant),
             ),
           ),
         ],
@@ -904,24 +1095,27 @@ class _AttachmentViewer extends ConsumerWidget {
                 const Spacer(),
                 Text(
                   attachmentCategoryLabels[attachment.category] ?? 'Autre',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.share_outlined, color: Colors.white),
-                  onPressed: () => Share.shareXFiles([XFile(attachment.filePath)]),
+                  onPressed: () =>
+                      Share.shareXFiles([XFile(attachment.filePath)]),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.white),
-                  onPressed: () => _confirmDeleteAttachment(context, ref, attachment),
+                  onPressed: () =>
+                      _confirmDeleteAttachment(context, ref, attachment),
                 ),
               ],
             ),
             Expanded(
               child: InteractiveViewer(
-                child: Center(
-                  child: Image.file(File(attachment.filePath)),
-                ),
+                child: Center(child: Image.file(File(attachment.filePath))),
               ),
             ),
           ],

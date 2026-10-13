@@ -2,7 +2,7 @@ name: locations_app
 description: "LocaTrack - Gestion des contrats de location"
 publish_to: 'none'
 
-version: 1.2.1+4
+version: 1.3.0+5
 
 environment:
   sdk: ^3.13.3
@@ -27,9 +27,6 @@ dependencies:
 
   # Preferences (réglages / rappels)
   shared_preferences: ^2.3.4
-
-  # UI
-  google_fonts: ^6.2.1
 
   # Notifications locales (rappel d'expiration de contrat)
   flutter_local_notifications: ^18.0.1
@@ -61,3 +58,18 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Police Inter embarquée (licence OFL : assets/fonts/LICENSE.txt), 100 % hors ligne
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+          weight: 800

@@ -39,6 +39,12 @@ final vacantContractsProvider = StreamProvider<List<Contract>>((ref) {
   return db.watchVacantContracts();
 });
 
+/// Tous les paiements enregistrés (alimente les analyses du portefeuille).
+final allPaymentsProvider = StreamProvider<List<Payment>>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchAllPayments();
+});
+
 /// Historique des paiements d'un contrat donné.
 final paymentsForContractProvider =
     StreamProvider.family<List<Payment>, String>((ref, contractId) {

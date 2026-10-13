@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/aurora_card.dart';
+
 class CarouselSlide {
   final IconData icon;
   final String title;
@@ -14,13 +16,8 @@ class CarouselSlide {
 
 class FeatureCarousel extends StatefulWidget {
   final List<CarouselSlide> slides;
-  final Color accentColor;
 
-  const FeatureCarousel({
-    super.key,
-    required this.slides,
-    required this.accentColor,
-  });
+  const FeatureCarousel({super.key, required this.slides});
 
   @override
   State<FeatureCarousel> createState() => _FeatureCarouselState();
@@ -44,81 +41,47 @@ class _FeatureCarouselState extends State<FeatureCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final accent = widget.accentColor;
-
-    return Container(
+    return SizedBox(
       height: 320,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [accent, accent.withValues(alpha: 0.72)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: accent.withValues(alpha: 0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: Stack(
+      child: AuroraCard(
+        padding: EdgeInsets.zero,
+        child: Column(
           children: [
-            Positioned(
-              top: -40,
-              right: -40,
-              child: _decorCircle(90, Colors.white.withValues(alpha: 0.08)),
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: widget.slides.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (context, i) =>
+                    _SlideContent(slide: widget.slides[i]),
+              ),
             ),
-            Positioned(
-              bottom: -30,
-              left: -30,
-              child: _decorCircle(110, Colors.white.withValues(alpha: 0.06)),
-            ),
-            Column(
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                    controller: _controller,
-                    itemCount: widget.slides.length,
-                    onPageChanged: (i) => setState(() => _index = i),
-                    itemBuilder: (context, i) => _SlideContent(slide: widget.slides[i]),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var i = 0; i < widget.slides.length; i++)
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 220),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _index == i ? 22 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: _index == i ? 0.95 : 0.4),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < widget.slides.length; i++)
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: _index == i ? 22 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(
+                          alpha: _index == i ? 0.95 : 0.4,
                         ),
-                    ],
-                  ),
-                ),
-              ],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
-  Widget _decorCircle(double size, Color color) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      );
 }
 
 class _SlideContent extends StatelessWidget {
@@ -139,7 +102,10 @@ class _SlideContent extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.16),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
             ),
             child: Icon(slide.icon, color: Colors.white, size: 38),
           ),

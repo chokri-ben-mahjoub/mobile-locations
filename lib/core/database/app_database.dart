@@ -229,6 +229,8 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // ---------- Sauvegarde / restauration ----------
+  Stream<List<Payment>> watchAllPayments() => select(payments).watch();
+
   Future<List<Contract>> getAllContracts() => select(contracts).get();
 
   Future<List<Payment>> getAllPayments() => select(payments).get();
