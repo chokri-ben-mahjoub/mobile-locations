@@ -7,6 +7,7 @@ import 'package:locations_app/core/export/contracts_export_table.dart';
 import 'package:locations_app/core/export/csv_exporter.dart';
 import 'package:locations_app/core/export/excel_exporter.dart';
 import 'package:locations_app/core/export/pdf_table_exporter.dart';
+import 'package:locations_app/l10n/app_localizations_fr.dart';
 
 // L'export image (ImageTableExporter.capture) n'est pas couvert ici : il
 // insère un OverlayEntry et attend deux frames réelles (`endOfFrame`),
@@ -34,7 +35,7 @@ void main() {
 
   group('export des contrats — nom de locataire en arabe', () {
     final contracts = [_contract(tenantName: arabicName)];
-    final table = buildContractsExportTable(contracts, 'DT');
+    final table = buildContractsExportTable(AppLocalizationsFr(), contracts, 'DT');
 
     test('ExportTable conserve le nom arabe tel quel', () {
       expect(table.rows.single[1], arabicName);

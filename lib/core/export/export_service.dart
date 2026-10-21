@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../data/firestore_service.dart';
 import '../database/app_providers.dart';
@@ -14,18 +15,18 @@ import 'share_files.dart';
 enum ExportFormat { csv, excel, pdf, image }
 
 extension ExportFormatUi on ExportFormat {
-  String get label => switch (this) {
-        ExportFormat.csv => 'CSV',
-        ExportFormat.excel => 'Excel',
-        ExportFormat.pdf => 'PDF',
-        ExportFormat.image => 'Image',
+  String label(AppLocalizations l10n) => switch (this) {
+        ExportFormat.csv => l10n.formatCsv,
+        ExportFormat.excel => l10n.formatExcel,
+        ExportFormat.pdf => l10n.formatPdf,
+        ExportFormat.image => l10n.formatImage,
       };
 
-  String get description => switch (this) {
-        ExportFormat.csv => 'Fichier .csv, compatible Excel',
-        ExportFormat.excel => 'Classeur .xlsx avec mise en forme',
-        ExportFormat.pdf => 'Document PDF prêt à imprimer',
-        ExportFormat.image => 'Capture PNG du tableau, à partager',
+  String description(AppLocalizations l10n) => switch (this) {
+        ExportFormat.csv => l10n.formatCsvDescription,
+        ExportFormat.excel => l10n.formatExcelDescription,
+        ExportFormat.pdf => l10n.formatPdfDescription,
+        ExportFormat.image => l10n.formatImageDescription,
       };
 
   IconData get icon => switch (this) {
@@ -59,7 +60,15 @@ class ContractsExportService {
       firestoreService.fetchAllPaymentsOnce(),
       firestoreService.fetchAllUtilityBillsOnce(),
     ]);
+    if (!context.mounted) {
+      // Jamais affiché à l'utilisateur (le SnackBar qui suit vérifie aussi
+      // `context.mounted`) — pas besoin de traduire ce message.
+      throw Exception('Screen closed before the export finished.');
+    }
+    // ignore: use_build_context_synchronously
+    final l10n = AppLocalizations.of(context);
     final table = buildContractsExportTable(
+      l10n,
       contracts,
       currency,
       payments: results[0] as List<Payment>,
@@ -70,7 +79,7 @@ class ContractsExportService {
     final datePart =
         '${stamp.year}-${stamp.month.toString().padLeft(2, '0')}-${stamp.day.toString().padLeft(2, '0')}';
     const baseName = 'locatrack_contrats';
-    const title = 'Contrats de location';
+    final title = l10n.exportDocumentTitle;
 
     final ShareableFile file;
     switch (format) {
@@ -79,7 +88,7 @@ class ContractsExportService {
       case ExportFormat.excel:
         final bytes = ExcelExporter.encode(table);
         if (bytes == null) {
-          throw Exception('Échec de la génération du fichier Excel.');
+          throw Exception(l10n.excelGenerationFailed);
         }
         file = ShareableFile(
           '${baseName}_$datePart.xlsx',
@@ -91,7 +100,7 @@ class ContractsExportService {
         file = ShareableFile('${baseName}_$datePart.pdf', 'application/pdf', bytes);
       case ExportFormat.image:
         if (!context.mounted) {
-          throw Exception('Écran fermé avant la fin de l\'export.');
+          throw Exception('Screen closed before the export finished.');
         }
         // ignore: use_build_context_synchronously
         final bytes = await ImageTableExporter.capture(context: context, table: table, title: title);
@@ -132,14 +141,15 @@ Future<void> runContractsExport(BuildContext context, WidgetRef ref) async {
     );
     if (!context.mounted) return;
     if (action == ExportAction.download) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(done ? 'Fichier téléchargé.' : 'Téléchargement annulé.')),
+        SnackBar(content: Text(done ? l10n.fileDownloaded : l10n.downloadCancelled)),
       );
     }
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Échec de l\'export : $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).exportFailed('$e'))),
       );
     }
   }
@@ -158,12 +168,12 @@ Future<(ExportFormat, ExportAction)?> chooseExportFormat(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Exporter les contrats',
+              AppLocalizations.of(context).exportSheetTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
             Text(
-              'Les noms des locataires en arabe s\'affichent correctement dans tous les formats.',
+              AppLocalizations.of(context).exportSheetSubtitle,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -195,6 +205,7 @@ class _FormatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHigh,
@@ -217,21 +228,21 @@ class _FormatTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(format.label, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(format.label(l10n), style: const TextStyle(fontWeight: FontWeight.w700)),
                 Text(
-                  format.description,
+                  format.description(l10n),
                   style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
                 ),
               ],
             ),
           ),
           IconButton(
-            tooltip: 'Télécharger',
+            tooltip: l10n.download,
             onPressed: onDownload,
             icon: Icon(Icons.download_rounded, color: scheme.onSurfaceVariant),
           ),
           IconButton(
-            tooltip: 'Partager',
+            tooltip: l10n.share,
             onPressed: onShare,
             icon: Icon(Icons.ios_share_rounded, color: scheme.onSurfaceVariant),
           ),

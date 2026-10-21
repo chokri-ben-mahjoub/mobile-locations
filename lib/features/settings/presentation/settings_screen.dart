@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
@@ -11,6 +12,7 @@ import '../../../core/auth/firebase_auth_providers.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/export/export_service.dart';
 import '../../../core/migration/legacy_migration.dart';
+import '../../../core/theme/locale_providers.dart';
 import '../../../core/theme/theme_providers.dart';
 import '../../../core/widgets/aurora_card.dart';
 import '../../../core/widgets/pressable.dart';
@@ -30,6 +32,8 @@ class SettingsScreen extends ConsumerWidget {
     final leadMonths = settings?.reminderLeadMonths ?? 1;
     final scheme = Theme.of(context).colorScheme;
     final pad = MediaQuery.of(context).padding;
+    final l10n = AppLocalizations.of(context);
+    final locale = ref.watch(localeControllerProvider);
 
     return Scaffold(
       body: ListView(
@@ -37,7 +41,7 @@ class SettingsScreen extends ConsumerWidget {
         padding: EdgeInsets.fromLTRB(16, pad.top + 14, 16, 150 + pad.bottom),
         children: [
           Text(
-            'Réglages',
+            l10n.settingsTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.6,
@@ -49,11 +53,11 @@ class SettingsScreen extends ConsumerWidget {
           Reveal(
             delay: 60,
             child: SectionCard(
-              title: 'Rappels d\'expiration',
+              title: l10n.settingsReminders,
               icon: Icons.notifications_active_outlined,
               children: [
                 Text(
-                  'Délai de préavis avant la date de fin d\'un contrat',
+                  l10n.settingsRemindersSubtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -63,10 +67,10 @@ class SettingsScreen extends ConsumerWidget {
                   width: double.infinity,
                   child: SegmentedButton<int>(
                     showSelectedIcon: false,
-                    segments: const [
-                      ButtonSegment(value: 1, label: Text('1 mois')),
-                      ButtonSegment(value: 2, label: Text('2 mois')),
-                      ButtonSegment(value: 3, label: Text('3 mois')),
+                    segments: [
+                      ButtonSegment(value: 1, label: Text(l10n.months1)),
+                      ButtonSegment(value: 2, label: Text(l10n.months2)),
+                      ButtonSegment(value: 3, label: Text(l10n.months3)),
                     ],
                     selected: {leadMonths},
                     onSelectionChanged: (set) {
@@ -79,8 +83,8 @@ class SettingsScreen extends ConsumerWidget {
                 TextFormField(
                   key: ValueKey('lead-$leadMonths'),
                   initialValue: '$leadMonths',
-                  decoration: const InputDecoration(
-                    labelText: 'Ou valeur personnalisée (en mois)',
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsCustomDelay,
                   ),
                   keyboardType: TextInputType.number,
                   onFieldSubmitted: (v) {
@@ -97,34 +101,61 @@ class SettingsScreen extends ConsumerWidget {
           Reveal(
             delay: 110,
             child: SectionCard(
-              title: 'Apparence',
+              title: l10n.settingsAppearance,
               icon: Icons.palette_outlined,
               children: [
                 SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<ThemeMode>(
                     showSelectedIcon: false,
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: ThemeMode.light,
-                        label: Text('Clair'),
-                        icon: Icon(Icons.light_mode_outlined),
+                        label: Text(l10n.themeLight),
+                        icon: const Icon(Icons.light_mode_outlined),
                       ),
                       ButtonSegment(
                         value: ThemeMode.system,
-                        label: Text('Auto'),
-                        icon: Icon(Icons.brightness_auto_outlined),
+                        label: Text(l10n.themeAuto),
+                        icon: const Icon(Icons.brightness_auto_outlined),
                       ),
                       ButtonSegment(
                         value: ThemeMode.dark,
-                        label: Text('Sombre'),
-                        icon: Icon(Icons.dark_mode_outlined),
+                        label: Text(l10n.themeDark),
+                        icon: const Icon(Icons.dark_mode_outlined),
                       ),
                     ],
                     selected: {themeMode},
                     onSelectionChanged: (set) {
                       HapticFeedback.selectionClick();
                       ref.read(themeModeProvider.notifier).set(set.first);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Reveal(
+            delay: 135,
+            child: SectionCard(
+              title: l10n.settingsLanguage,
+              icon: Icons.translate_rounded,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<Locale?>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(value: null, label: Text(l10n.languageSystem)),
+                      const ButtonSegment(value: Locale('fr'), label: Text('Français')),
+                      const ButtonSegment(value: Locale('en'), label: Text('English')),
+                      const ButtonSegment(value: Locale('ar'), label: Text('العربية')),
+                    ],
+                    selected: {locale},
+                    onSelectionChanged: (set) {
+                      HapticFeedback.selectionClick();
+                      ref.read(localeControllerProvider.notifier).set(set.first);
                     },
                   ),
                 ),
@@ -202,7 +233,7 @@ class _AboutHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Synchronisé entre mobile et web.',
+                  AppLocalizations.of(context).settingsSyncedSubtitle,
                   style: text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
                 ),
               ],
@@ -221,9 +252,10 @@ class _SecuritySection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final biometricEnabled = ref.watch(biometricEnabledProvider);
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return SectionCard(
-      title: 'Sécurité',
+      title: l10n.settingsSecurity,
       icon: Icons.lock_outline_rounded,
       children: [
         FutureBuilder<bool>(
@@ -232,14 +264,12 @@ class _SecuritySection extends ConsumerWidget {
             final available = snapshot.data ?? false;
             return SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text(
-                'Déverrouillage biométrique',
-                style: TextStyle(fontWeight: FontWeight.w600),
+              title: Text(
+                l10n.biometricUnlock,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                available
-                    ? 'Utiliser l\'empreinte ou le visage pour vous connecter'
-                    : 'Non disponible sur cet appareil',
+                available ? l10n.biometricAvailableSubtitle : l10n.biometricUnavailableSubtitle,
               ),
               value: biometricEnabled && available,
               onChanged: available
@@ -266,10 +296,10 @@ class _SecuritySection extends ConsumerWidget {
                 child: Icon(Icons.pin_outlined, size: 20, color: scheme.onSurfaceVariant),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Changer le code PassCode',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  l10n.changePin,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
               Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
@@ -289,13 +319,14 @@ class _AccountSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final user = ref.watch(firebaseAuthStateProvider).valueOrNull;
+    final l10n = AppLocalizations.of(context);
 
     return SectionCard(
-      title: 'Compte',
+      title: l10n.settingsAccount,
       icon: Icons.cloud_outlined,
       children: [
         Text(
-          'Connecté en tant que',
+          l10n.connectedAs,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -314,19 +345,16 @@ class _AccountSection extends ConsumerWidget {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Se déconnecter ?'),
-                  content: const Text(
-                    'Vous devrez ressaisir l\'e-mail et le mot de passe '
-                    'du compte pour retrouver vos données.',
-                  ),
+                  title: Text(l10n.signOutConfirmTitle),
+                  content: Text(l10n.signOutConfirmBody),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Annuler'),
+                      child: Text(l10n.cancel),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Se déconnecter'),
+                      child: Text(l10n.signOut),
                     ),
                   ],
                 ),
@@ -341,9 +369,9 @@ class _AccountSection extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             icon: const Icon(Icons.logout_rounded),
-            label: const Text(
-              'Se déconnecter',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            label: Text(
+              l10n.signOut,
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -379,15 +407,14 @@ class _MigrationSectionState extends ConsumerState<_MigrationSection> {
   Widget build(BuildContext context) {
     if (_hasLocalData != true) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return SectionCard(
-      title: 'Anciennes données locales',
+      title: l10n.legacyDataTitle,
       icon: Icons.sync_alt_rounded,
       children: [
         Text(
-          'Des contrats enregistrés avant le passage au cloud ont été '
-          'détectés sur cet appareil. Importez-les une fois vers le compte '
-          'partagé pour les retrouver sur tous vos appareils.',
+          l10n.legacyDataBody,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -406,7 +433,7 @@ class _MigrationSectionState extends ConsumerState<_MigrationSection> {
                   )
                 : const Icon(Icons.cloud_upload_outlined),
             label: Text(
-              _migrating ? 'Import en cours…' : 'Importer vers le cloud',
+              _migrating ? l10n.importInProgress : l10n.importToCloud,
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
@@ -417,18 +444,19 @@ class _MigrationSectionState extends ConsumerState<_MigrationSection> {
 
   Future<void> _migrate() async {
     setState(() => _migrating = true);
+    final l10n = AppLocalizations.of(context);
     try {
       final count = await _service.migrateTo(ref.read(firestoreServiceProvider));
       if (mounted) {
         setState(() => _hasLocalData = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$count éléments importés avec succès.')),
+          SnackBar(content: Text(l10n.importSuccess(count))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'import : $e')),
+          SnackBar(content: Text(l10n.importFailed('$e'))),
         );
       }
     } finally {
@@ -450,15 +478,14 @@ class _ExportSectionState extends ConsumerState<_ExportSection> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return SectionCard(
-      title: 'Export',
+      title: l10n.exportSectionTitle,
       icon: Icons.table_chart_outlined,
       children: [
         Text(
-          'Exportez tous les contrats (actifs et en attente) en CSV, Excel, '
-          'PDF ou image — les noms de locataires en arabe s\'affichent '
-          'correctement dans les 4 formats.',
+          l10n.exportSectionBody,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -476,9 +503,9 @@ class _ExportSectionState extends ConsumerState<_ExportSection> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.ios_share_rounded),
-            label: const Text(
-              'Exporter / partager',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            label: Text(
+              l10n.exportShareButton,
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ),

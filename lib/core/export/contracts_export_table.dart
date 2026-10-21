@@ -1,11 +1,13 @@
+import 'package:locations_app/l10n/app_localizations.dart';
+
 import '../data/models.dart';
 import '../utils/format_utils.dart';
 import 'export_table.dart';
 
-String contractStatusLabel(Contract c, DateTime now) {
-  if (c.archived) return 'En attente';
-  if (!c.endDate.isAfter(now)) return 'Expiré';
-  return 'Actif';
+String contractStatusLabel(AppLocalizations l10n, Contract c, DateTime now) {
+  if (c.archived) return l10n.statusPending;
+  if (!c.endDate.isAfter(now)) return l10n.statusExpired;
+  return l10n.statusActive;
 }
 
 DateTime? _latestPaidDate(Iterable<DateTime> dates) {
@@ -25,6 +27,7 @@ DateTime? _latestPaidDate(Iterable<DateTime> dates) {
 /// loyer, de la dernière facture STEG et de la dernière facture SONEDE
 /// réglés par le locataire, pour chaque contrat.
 ExportTable buildContractsExportTable(
+  AppLocalizations l10n,
   List<Contract> contracts,
   String currency, {
   List<Payment> payments = const [],
@@ -43,21 +46,21 @@ ExportTable buildContractsExportTable(
   }
 
   return ExportTable(
-    name: 'Contrats',
+    name: l10n.exportTableName,
     headers: [
-      'N°',
-      'Locataire',
-      'Local',
-      'Date début',
-      'Date fin',
-      'Durée',
-      'Loyer mensuel ($currency)',
-      'Compteur STEG',
-      'Compteur SONEDE',
-      'Statut',
-      'Dernier loyer payé le',
-      'Dernier STEG payé le',
-      'Dernier SONEDE payé le',
+      l10n.exportColNumber,
+      l10n.exportColTenant,
+      l10n.exportColUnit,
+      l10n.exportColStartDate,
+      l10n.exportColEndDate,
+      l10n.exportColDuration,
+      l10n.exportColMonthlyRent(currency),
+      l10n.exportColSteg,
+      l10n.exportColSonede,
+      l10n.exportColStatus,
+      l10n.exportColLastRentPaid,
+      l10n.exportColLastStegPaid,
+      l10n.exportColLastSonedePaid,
     ],
     rows: [
       for (final (i, c) in sorted.indexed)
@@ -67,16 +70,18 @@ ExportTable buildContractsExportTable(
           c.unitNumber,
           DateOnly(c.startDate),
           DateOnly(c.endDate),
-          FormatUtils.durationLabel(c.startDate, c.endDate),
+          FormatUtils.durationLabel(l10n, c.startDate, c.endDate),
           c.monthlyAmount,
           c.stegMeter ?? '',
           c.sonedeMeter ?? '',
-          contractStatusLabel(c, now),
-          _lastPaidCell(paymentsByContract[c.id]?.map((p) => p.paidDate)),
+          contractStatusLabel(l10n, c, now),
+          _lastPaidCell(l10n, paymentsByContract[c.id]?.map((p) => p.paidDate)),
           _lastPaidCell(
+            l10n,
             utilityBillsByContract[c.id]?.where((b) => b.type == 'steg').map((b) => b.paidDate),
           ),
           _lastPaidCell(
+            l10n,
             utilityBillsByContract[c.id]?.where((b) => b.type == 'sonede').map((b) => b.paidDate),
           ),
         ],
@@ -84,8 +89,8 @@ ExportTable buildContractsExportTable(
   );
 }
 
-Object _lastPaidCell(Iterable<DateTime>? dates) {
-  if (dates == null) return 'Non payé';
+Object _lastPaidCell(AppLocalizations l10n, Iterable<DateTime>? dates) {
+  if (dates == null) return l10n.notPaid;
   final latest = _latestPaidDate(dates);
-  return latest == null ? 'Non payé' : DateOnly(latest);
+  return latest == null ? l10n.notPaid : DateOnly(latest);
 }

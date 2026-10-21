@@ -2,16 +2,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:locations_app/core/auth/auth_providers.dart';
 import 'package:locations_app/core/database/app_providers.dart';
 import 'package:locations_app/core/theme/app_theme.dart';
+import 'package:locations_app/core/theme/locale_providers.dart';
 import 'package:locations_app/core/widgets/aurora_card.dart';
 import 'package:locations_app/features/auth/presentation/onboarding_screen.dart';
 import 'package:locations_app/features/auth/presentation/passcode_screen.dart';
 import 'package:locations_app/features/contracts/presentation/contract_form_screen.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> _loadInter() async {
@@ -32,7 +35,18 @@ void _setScreen(WidgetTester tester, Size logical) {
 Widget _app(Widget home, {List<Override> overrides = const []}) =>
     ProviderScope(
       overrides: overrides,
-      child: MaterialApp(theme: AppTheme.light(), home: home),
+      child: MaterialApp(
+        theme: AppTheme.light(),
+        locale: const Locale('fr'),
+        supportedLocales: supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: home,
+      ),
     );
 
 Future<void> _tapDigits(WidgetTester tester, String digits) async {

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/attachments/attachment_service.dart';
@@ -250,7 +251,7 @@ class ContractDetailScreen extends ConsumerWidget {
                 _InfoTile(
                   icon: Icons.hourglass_bottom_rounded,
                   label: 'Durée',
-                  value: FormatUtils.durationLabel(c.startDate, c.endDate),
+                  value: FormatUtils.durationLabel(AppLocalizations.of(context), c.startDate, c.endDate),
                 ),
                 _InfoTile(
                   icon: Icons.bolt_outlined,

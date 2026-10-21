@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
@@ -42,9 +43,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     final available = await biometricService.isAvailable;
     if (!available) {
+      if (!mounted) return;
       setState(() {
         _checking = false;
-        _error = 'Biométrie non configurée sur cet appareil.';
+        _error = AppLocalizations.of(context).biometricNotConfigured;
       });
       return;
     }
@@ -54,13 +56,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (success) {
       ref.read(sessionAuthenticatedProvider.notifier).state = true;
     } else {
-      setState(() => _error = 'Authentification biométrique annulée.');
+      setState(() => _error = AppLocalizations.of(context).biometricCancelled);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: GlowBackground(
@@ -72,27 +75,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const _Brand(),
                 const SizedBox(height: 8),
                 Text(
-                  'Gestion des contrats de location',
+                  l10n.appTagline,
                   style: Theme.of(context).textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 28),
-                const FeatureCarousel(
+                FeatureCarousel(
                   slides: [
                     CarouselSlide(
                       icon: Icons.description_outlined,
-                      title: 'Tous vos contrats au même endroit',
-                      subtitle: 'Locataires, loyers, dates et compteurs en un coup d\'œil.',
+                      title: l10n.loginSlide1Title,
+                      subtitle: l10n.loginSlide1Subtitle,
                     ),
                     CarouselSlide(
                       icon: Icons.notifications_active_outlined,
-                      title: 'Rappels avant expiration',
-                      subtitle: 'Soyez alerté automatiquement avant la fin de chaque bail.',
+                      title: l10n.loginSlide2Title,
+                      subtitle: l10n.loginSlide2Subtitle,
                     ),
                     CarouselSlide(
                       icon: Icons.bar_chart_rounded,
-                      title: 'Vue d\'ensemble des loyers',
-                      subtitle: 'Suivez le revenu locatif total et les échéances à venir.',
+                      title: l10n.loginSlide3Title,
+                      subtitle: l10n.loginSlide3Subtitle,
                     ),
                   ],
                 ),
@@ -127,9 +130,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           )
                         : const Icon(Icons.fingerprint),
-                    label: const Text(
-                      'Se connecter avec biométrie',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    label: Text(
+                      l10n.signInWithBiometrics,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -146,9 +149,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      'Se connecter via PassCode',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    child: Text(
+                      l10n.signInWithPasscode,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

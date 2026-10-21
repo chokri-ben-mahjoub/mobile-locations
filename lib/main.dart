@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -12,6 +13,7 @@ import 'core/notifications/notification_providers.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/locale_providers.dart';
 import 'core/theme/theme_providers.dart';
 import 'firebase_options.dart';
 
@@ -28,6 +30,8 @@ Future<void> main() async {
     );
   }
   await initializeDateFormatting('fr_FR', null);
+  await initializeDateFormatting('en_US', null);
+  await initializeDateFormatting('ar', null);
   await notificationService.init();
   await notificationService.requestPermission();
   runApp(const ProviderScope(child: LocaTrackApp()));
@@ -41,6 +45,7 @@ class LocaTrackApp extends ConsumerWidget {
     final authReady = ref.watch(authReadyProvider);
     final firebaseAuthState = ref.watch(firebaseAuthStateProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeControllerProvider);
     // Observé en continu pour maintenir les rappels de contrats à jour.
     ref.watch(notificationSyncProvider);
 
@@ -58,9 +63,10 @@ class LocaTrackApp extends ConsumerWidget {
       themeMode: themeMode,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      locale: const Locale('fr'),
-      supportedLocales: const [Locale('fr'), Locale('en')],
+      locale: locale,
+      supportedLocales: supportedLocales,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

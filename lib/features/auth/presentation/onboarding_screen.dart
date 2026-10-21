@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/database/app_providers.dart';
 import '../../../core/theme/app_theme.dart';
@@ -21,6 +22,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: GlowBackground(
@@ -64,7 +66,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Reveal(
                   delay: 60,
                   child: Text(
-                    'Bienvenue sur LocaTrack',
+                    l10n.onboardingWelcome,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1,
@@ -76,39 +78,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Reveal(
                   delay: 120,
                   child: Text(
-                    'Suivez vos contrats de location de locaux commerciaux : '
-                    'loyers, échéances et compteurs STEG/SONEDE.',
+                    l10n.onboardingSubtitle,
                     style: Theme.of(context).textTheme.bodyLarge
                         ?.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
                   ),
                 ),
                 const SizedBox(height: 28),
-                const Reveal(
+                Reveal(
                   delay: 180,
                   child: _Feature(
                     icon: Icons.notifications_active_outlined,
-                    title: 'Rappels avant expiration',
-                    subtitle:
-                        'Alertes automatiques avant la fin de chaque bail.',
+                    title: l10n.onboardingFeature1Title,
+                    subtitle: l10n.onboardingFeature1Subtitle,
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Reveal(
+                Reveal(
                   delay: 240,
                   child: _Feature(
                     icon: Icons.insights_rounded,
-                    title: 'Encaissements en un geste',
-                    subtitle:
-                        'Glissez une carte pour encaisser, suivez 12 mois.',
+                    title: l10n.onboardingFeature2Title,
+                    subtitle: l10n.onboardingFeature2Subtitle,
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Reveal(
+                Reveal(
                   delay: 300,
                   child: _Feature(
                     icon: Icons.lock_outline_rounded,
-                    title: 'Privé, sur votre appareil',
-                    subtitle: 'Code et biométrie, sauvegarde à la demande.',
+                    title: l10n.onboardingFeature3Title,
+                    subtitle: l10n.onboardingFeature3Subtitle,
                   ),
                 ),
                 const Spacer(flex: 2),
@@ -132,12 +131,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Row(
+                          : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Commencer'),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward_rounded, size: 20),
+                                Text(l10n.start),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward_rounded, size: 20),
                               ],
                             ),
                     ),

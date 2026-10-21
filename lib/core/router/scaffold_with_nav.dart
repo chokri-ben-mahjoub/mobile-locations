@@ -2,23 +2,26 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+
+typedef _NavTab = (IconData, IconData, String);
 
 class ScaffoldWithNav extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   const ScaffoldWithNav({super.key, required this.navigationShell});
 
-  static const _items = [
-    (Icons.description_outlined, Icons.description_rounded, 'Contrats'),
-    (Icons.people_outline_rounded, Icons.people_alt_rounded, 'Locataires'),
-    (Icons.insights_outlined, Icons.insights_rounded, 'Analyses'),
-    (Icons.tune_outlined, Icons.tune_rounded, 'Réglages'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.sizeOf(context).width >= 840;
+    final l10n = AppLocalizations.of(context);
+    final items = <_NavTab>[
+      (Icons.description_outlined, Icons.description_rounded, l10n.navContracts),
+      (Icons.people_outline_rounded, Icons.people_alt_rounded, l10n.navTenants),
+      (Icons.insights_outlined, Icons.insights_rounded, l10n.navAnalytics),
+      (Icons.tune_outlined, Icons.tune_rounded, l10n.navSettings),
+    ];
 
     void select(int i) {
       HapticFeedback.selectionClick();
@@ -29,7 +32,7 @@ class ScaffoldWithNav extends StatelessWidget {
       return Scaffold(
         body: Row(
           children: [
-            _SideRail(index: navigationShell.currentIndex, onSelect: select),
+            _SideRail(index: navigationShell.currentIndex, onSelect: select, items: items),
             Expanded(
               child: Center(
                 child: ConstrainedBox(
@@ -53,6 +56,7 @@ class ScaffoldWithNav extends StatelessWidget {
           child: _GlassBar(
             index: navigationShell.currentIndex,
             onSelect: select,
+            items: items,
           ),
         ),
       ),
@@ -63,8 +67,9 @@ class ScaffoldWithNav extends StatelessWidget {
 class _SideRail extends StatelessWidget {
   final int index;
   final ValueChanged<int> onSelect;
+  final List<_NavTab> items;
 
-  const _SideRail({required this.index, required this.onSelect});
+  const _SideRail({required this.index, required this.onSelect, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +110,7 @@ class _SideRail extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          for (final (i, item) in ScaffoldWithNav._items.indexed)
+          for (final (i, item) in items.indexed)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: _RailItem(
@@ -175,8 +180,9 @@ class _RailItem extends StatelessWidget {
 class _GlassBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onSelect;
+  final List<_NavTab> items;
 
-  const _GlassBar({required this.index, required this.onSelect});
+  const _GlassBar({required this.index, required this.onSelect, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +220,7 @@ class _GlassBar extends StatelessWidget {
             ),
             child: Row(
               children: [
-                for (final (i, item) in ScaffoldWithNav._items.indexed)
+                for (final (i, item) in items.indexed)
                   Expanded(
                     child: _NavItem(
                       icon: item.$1,

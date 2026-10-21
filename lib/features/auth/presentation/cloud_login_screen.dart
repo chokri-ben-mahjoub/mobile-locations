@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/auth/firebase_auth_providers.dart';
 import '../../../core/theme/app_theme.dart';
@@ -35,13 +36,13 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
       _loading = true;
       _error = null;
     });
-    final error = await ref
+    final errorCode = await ref
         .read(cloudAuthControllerProvider)
         .signIn(_emailController.text, _passwordController.text);
     if (!mounted) return;
     setState(() {
       _loading = false;
-      _error = error;
+      _error = errorCode?.toLoginErrorMessage(AppLocalizations.of(context));
     });
     // Si succès, le routeur redirige automatiquement (flux Firebase Auth).
   }
@@ -49,6 +50,7 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: GlowBackground(
@@ -78,14 +80,14 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Connexion au compte LocaTrack',
+                        l10n.cloudLoginTitle,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleLarge
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Vos données sont partagées entre le mobile et le web.',
+                        l10n.cloudLoginSubtitle,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
@@ -95,12 +97,12 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         autofillHints: const [AutofillHints.email],
-                        decoration: const InputDecoration(
-                          labelText: 'E-mail',
-                          prefixIcon: Icon(Icons.email_outlined),
+                        decoration: InputDecoration(
+                          labelText: l10n.email,
+                          prefixIcon: const Icon(Icons.email_outlined),
                         ),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Champ requis'
+                            ? l10n.fieldRequired
                             : null,
                       ),
                       const SizedBox(height: 14),
@@ -109,7 +111,7 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                         obscureText: _obscure,
                         autofillHints: const [AutofillHints.password],
                         decoration: InputDecoration(
-                          labelText: 'Mot de passe',
+                          labelText: l10n.password,
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -122,7 +124,7 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                           ),
                         ),
                         validator: (v) =>
-                            (v == null || v.isEmpty) ? 'Champ requis' : null,
+                            (v == null || v.isEmpty) ? l10n.fieldRequired : null,
                         onFieldSubmitted: (_) => _submit(),
                       ),
                       if (_error != null) ...[
@@ -155,9 +157,9 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text(
-                                  'Se connecter',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
+                              : Text(
+                                  l10n.signIn,
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
                                 ),
                         ),
                       ),

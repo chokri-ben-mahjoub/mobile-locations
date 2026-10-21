@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
@@ -456,7 +457,7 @@ class _Preview extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      '$amountLabel / mois  ·  ${FormatUtils.durationLabel(start, end)}',
+                      '$amountLabel / mois  ·  ${FormatUtils.durationLabel(AppLocalizations.of(context), start, end)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall?.copyWith(

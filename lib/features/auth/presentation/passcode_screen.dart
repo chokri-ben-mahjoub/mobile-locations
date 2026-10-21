@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
@@ -44,18 +45,16 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
     super.dispose();
   }
 
-  String get _title {
-    if (widget.mode == PasscodeMode.verify) return 'Entrez votre code';
-    return _confirmStage ? 'Confirmez votre code' : 'Créez votre code';
+  String _title(AppLocalizations l10n) {
+    if (widget.mode == PasscodeMode.verify) return l10n.passcodeEnterTitle;
+    return _confirmStage ? l10n.passcodeConfirmTitle : l10n.passcodeCreateTitle;
   }
 
-  String get _subtitle {
+  String _subtitle(AppLocalizations l10n) {
     if (widget.mode == PasscodeMode.verify) {
-      return 'Saisissez votre PassCode à $_pinLength chiffres';
+      return l10n.passcodeEnterSubtitle(_pinLength);
     }
-    return _confirmStage
-        ? 'Ressaisissez le même code pour confirmer'
-        : 'Ce code vous permettra de déverrouiller LocaTrack';
+    return _confirmStage ? l10n.passcodeConfirmSubtitle : l10n.passcodeCreateSubtitle;
   }
 
   void _onDigit(String d) {
@@ -88,8 +87,9 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
         ref.read(sessionAuthenticatedProvider.notifier).state = true;
       } else {
         await _shake();
+        if (!mounted) return;
         setState(() {
-          _error = 'Code incorrect, réessayez.';
+          _error = AppLocalizations.of(context).passcodeWrong;
           _digits.clear();
         });
       }
@@ -111,8 +111,9 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
       ref.read(sessionAuthenticatedProvider.notifier).state = true;
     } else {
       await _shake();
+      if (!mounted) return;
       setState(() {
-        _error = 'Les codes ne correspondent pas, recommencez.';
+        _error = AppLocalizations.of(context).passcodeMismatch;
         _confirmStage = false;
         _firstPin = null;
         _digits.clear();
@@ -135,6 +136,9 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
     final biometricEnabled = ref.watch(biometricEnabledProvider);
     final canUseBiometric = widget.mode == PasscodeMode.verify && biometricEnabled;
     final hasError = _error != null;
+    final l10n = AppLocalizations.of(context);
+    final title = _title(l10n);
+    final subtitle = _subtitle(l10n);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -194,8 +198,8 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 220),
                             child: Text(
-                              _title,
-                              key: ValueKey(_title),
+                              title,
+                              key: ValueKey(title),
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: -0.6,
@@ -204,7 +208,7 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            _subtitle,
+                            subtitle,
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: scheme.onSurfaceVariant,

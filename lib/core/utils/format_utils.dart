@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 class FormatUtils {
   static String currency(double amount, String currencyCode) {
@@ -22,13 +23,12 @@ class FormatUtils {
     return months < 0 ? 0 : months;
   }
 
-  static String durationLabel(DateTime start, DateTime end) {
+  static String durationLabel(AppLocalizations l10n, DateTime start, DateTime end) {
     final months = monthsBetween(start, end);
-    if (months <= 0) return '—';
+    if (months <= 0) return l10n.durationNone;
     if (months % 12 == 0) {
-      final years = months ~/ 12;
-      return years == 1 ? '1 an' : '$years ans';
+      return l10n.durationYears(months ~/ 12);
     }
-    return months == 1 ? '1 mois' : '$months mois';
+    return l10n.durationMonths(months);
   }
 }

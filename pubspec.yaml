@@ -67,6 +67,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   # Police Inter embarquée (licence OFL : assets/fonts/LICENSE.txt), 100 % hors ligne
   fonts:
