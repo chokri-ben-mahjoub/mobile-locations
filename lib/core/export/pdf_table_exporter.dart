@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../utils/arabic_text.dart';
 import 'export_table.dart';
 
 const _navy = PdfColor.fromInt(0xFF0B1E2D);
@@ -98,6 +99,25 @@ class PdfTableExporter {
             cellStyle: textStyle.copyWith(fontSize: fontSize),
             cellPadding: cellPadding,
             cellAlignment: pw.Alignment.centerLeft,
+            // La mise en forme arabe (jointure des lettres + ordre de
+            // lecture) n'est appliquée par le moteur `pdf` que sur un
+            // `Text` dont `textDirection` vaut `rtl` — sans ça, même avec
+            // `--dart-define=use_arabic=true`, les lettres arabes
+            // s'affichent isolées et dans le mauvais sens (voir le nom du
+            // locataire). On ne force le `rtl` que sur les cellules
+            // réellement arabes (les autres restent inchangées, sinon un
+            // texte français à plusieurs mots comme "Non payé" se
+            // retrouverait lui aussi réordonné par erreur).
+            cellBuilder: (columnIndex, data, rowNum) {
+              final text = _cell(data);
+              if (!isArabicText(text)) return null;
+              return pw.Text(
+                text,
+                textDirection: pw.TextDirection.rtl,
+                textAlign: pw.TextAlign.right,
+                style: textStyle.copyWith(fontSize: fontSize),
+              );
+            },
             data: [for (final row in table.rows) row.map(_cell).toList()],
           ),
         ],
