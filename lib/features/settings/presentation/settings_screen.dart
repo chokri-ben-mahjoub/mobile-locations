@@ -143,22 +143,25 @@ class SettingsScreen extends ConsumerWidget {
               title: l10n.settingsLanguage,
               icon: Icons.translate_rounded,
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<Locale?>(
-                    showSelectedIcon: false,
-                    segments: [
-                      ButtonSegment(value: null, label: Text(l10n.languageSystem)),
-                      const ButtonSegment(value: Locale('fr'), label: Text('Français')),
-                      const ButtonSegment(value: Locale('en'), label: Text('English')),
-                      const ButtonSegment(value: Locale('ar'), label: Text('العربية')),
-                    ],
-                    selected: {locale},
-                    onSelectionChanged: (set) {
-                      HapticFeedback.selectionClick();
-                      ref.read(localeControllerProvider.notifier).set(set.first);
-                    },
-                  ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final option in [
+                      (null, l10n.languageSystem),
+                      (const Locale('fr'), 'Français'),
+                      (const Locale('en'), 'English'),
+                      (const Locale('ar'), 'العربية'),
+                    ])
+                      ChoiceChip(
+                        label: Text(option.$2),
+                        selected: locale == option.$1,
+                        onSelected: (_) {
+                          HapticFeedback.selectionClick();
+                          ref.read(localeControllerProvider.notifier).set(option.$1);
+                        },
+                      ),
+                  ],
                 ),
               ],
             ),
