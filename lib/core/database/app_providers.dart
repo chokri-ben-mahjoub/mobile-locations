@@ -45,6 +45,13 @@ final allPaymentsProvider = StreamProvider<List<Payment>>((ref) {
   return service.watchAllPayments();
 });
 
+/// Toutes les factures STEG/SONEDE réglées, tous contrats confondus
+/// (alimente la vue globale des locataires).
+final allUtilityBillsProvider = StreamProvider<List<UtilityBill>>((ref) {
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchAllUtilityBills();
+});
+
 /// Historique des paiements d'un contrat donné.
 final paymentsForContractProvider =
     StreamProvider.family<List<Payment>, String>((ref, contractId) {

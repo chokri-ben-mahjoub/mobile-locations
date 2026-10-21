@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/attachments/attachment_service.dart';
 import '../../../core/database/app_providers.dart';
+import '../../../core/utils/arabic_text.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/receipt.dart';
@@ -105,7 +106,10 @@ class ContractDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(c.tenantName),
+        title: Text(
+          c.tenantName,
+          textDirection: isArabicText(c.tenantName) ? TextDirection.rtl : TextDirection.ltr,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -183,6 +187,10 @@ class ContractDetailScreen extends ConsumerWidget {
                         children: [
                           Text(
                             c.tenantName,
+                            textDirection: isArabicText(c.tenantName)
+                                ? TextDirection.rtl
+                                : TextDirection.ltr,
+                            textAlign: isArabicText(c.tenantName) ? TextAlign.right : TextAlign.left,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
                                   color: Colors.white,

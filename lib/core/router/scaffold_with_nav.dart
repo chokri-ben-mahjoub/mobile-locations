@@ -11,6 +11,7 @@ class ScaffoldWithNav extends StatelessWidget {
 
   static const _items = [
     (Icons.description_outlined, Icons.description_rounded, 'Contrats'),
+    (Icons.people_outline_rounded, Icons.people_alt_rounded, 'Locataires'),
     (Icons.insights_outlined, Icons.insights_rounded, 'Analyses'),
     (Icons.tune_outlined, Icons.tune_rounded, 'Réglages'),
   ];

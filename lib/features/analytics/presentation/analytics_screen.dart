@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/analytics/portfolio_stats.dart';
 import '../../../core/database/app_providers.dart';
+import '../../../core/export/export_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/receipt.dart';
@@ -26,6 +27,13 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   int? _selected;
+  bool _exporting = false;
+
+  Future<void> _exportContracts() async {
+    setState(() => _exporting = true);
+    await runContractsExport(context, ref);
+    if (mounted) setState(() => _exporting = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +95,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ),
                     ),
                   ),
+                  IconButton.filledTonal(
+                    tooltip: 'Exporter les contrats',
+                    icon: _exporting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.file_download_outlined, size: 20),
+                    onPressed: _exporting ? null : _exportContracts,
+                  ),
+                  const SizedBox(width: 8),
                   IconButton.filledTonal(
                     tooltip: 'Partager le rapport du mois',
                     icon: const Icon(Icons.ios_share_rounded, size: 20),

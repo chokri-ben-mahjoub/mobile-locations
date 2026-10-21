@@ -487,29 +487,9 @@ class _ExportSectionState extends ConsumerState<_ExportSection> {
   }
 
   Future<void> _export() async {
-    final format = await chooseExportFormat(context);
-    if (format == null || !mounted) return;
-
     setState(() => _exporting = true);
-    try {
-      final active = ref.read(contractsProvider).valueOrNull ?? [];
-      final vacant = ref.read(vacantContractsProvider).valueOrNull ?? [];
-      final currency = ref.read(currencyProvider);
-      await ContractsExportService.export(
-        context: context,
-        format: format,
-        contracts: [...active, ...vacant],
-        currency: currency,
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'export : $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _exporting = false);
-    }
+    await runContractsExport(context, ref);
+    if (mounted) setState(() => _exporting = false);
   }
 }
 

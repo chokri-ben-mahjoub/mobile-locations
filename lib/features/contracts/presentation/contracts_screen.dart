@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/analytics/portfolio_stats.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/arabic_text.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/receipt.dart';
 import '../../../core/widgets/animated_count.dart';
@@ -924,6 +925,12 @@ class _ContractCard extends ConsumerWidget {
                         contract.tenantName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        textDirection: isArabicText(contract.tenantName)
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                        textAlign: isArabicText(contract.tenantName)
+                            ? TextAlign.right
+                            : TextAlign.left,
                         style: Theme.of(context).textTheme.bodyMedium
                             ?.copyWith(fontWeight: FontWeight.w700),
                       ),
@@ -1184,6 +1191,12 @@ class _UnpaidSheet extends ConsumerWidget {
                                     c.tenantName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                    textDirection: isArabicText(c.tenantName)
+                                        ? TextDirection.rtl
+                                        : TextDirection.ltr,
+                                    textAlign: isArabicText(c.tenantName)
+                                        ? TextAlign.right
+                                        : TextAlign.left,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
                                     ),

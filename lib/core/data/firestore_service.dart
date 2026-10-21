@@ -126,6 +126,20 @@ class FirestoreService {
     return _payments.snapshots().map((s) => s.docs.map(Payment.fromDoc).toList());
   }
 
+  /// Lecture ponctuelle (hors flux) de tous les paiements — utilisée par
+  /// l'export des contrats pour afficher le dernier loyer payé.
+  Future<List<Payment>> fetchAllPaymentsOnce() async {
+    final snap = await _payments.get();
+    return snap.docs.map(Payment.fromDoc).toList();
+  }
+
+  /// Lecture ponctuelle de toutes les factures STEG/SONEDE — utilisée par
+  /// l'export des contrats pour afficher le dernier règlement par compteur.
+  Future<List<UtilityBill>> fetchAllUtilityBillsOnce() async {
+    final snap = await _utilityBills.get();
+    return snap.docs.map(UtilityBill.fromDoc).toList();
+  }
+
   Stream<List<Payment>> watchPaymentsForContract(String contractId) {
     return _payments
         .where('contractId', isEqualTo: contractId)
@@ -163,6 +177,13 @@ class FirestoreService {
   static String utilityBillId(String contractId, String type, DateTime month) {
     final key = monthKey(month);
     return '$contractId-$type-${key.year}-${key.month.toString().padLeft(2, '0')}';
+  }
+
+  /// Toutes les factures STEG/SONEDE réglées, tous contrats confondus —
+  /// utilisée par la vue globale des locataires pour afficher le dernier
+  /// règlement de chacun sans ouvrir chaque contrat.
+  Stream<List<UtilityBill>> watchAllUtilityBills() {
+    return _utilityBills.snapshots().map((s) => s.docs.map(UtilityBill.fromDoc).toList());
   }
 
   Stream<List<UtilityBill>> watchUtilityBills(String contractId, String type) {
