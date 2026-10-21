@@ -19,7 +19,8 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
 
-const _appVersion = 'v1.4.0';
+// Garder synchronisé avec `version:` dans pubspec.yaml à chaque changement.
+const _appVersion = 'v1.5.0';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
