@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:locations_app/core/database/app_database.dart';
 import 'package:locations_app/core/database/app_providers.dart';
 import 'package:locations_app/core/theme/app_theme.dart';
 import 'package:locations_app/features/settings/presentation/settings_screen.dart';
@@ -62,7 +61,6 @@ void main() {
           appSettingsProvider.overrideWith(
             (ref) => Stream.value(
               const AppSetting(
-                id: 1,
                 reminderLeadMonths: 2,
                 currency: 'TND',
                 onboardingDone: true,

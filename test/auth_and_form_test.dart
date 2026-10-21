@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:locations_app/core/auth/auth_providers.dart';
-import 'package:locations_app/core/database/app_database.dart';
 import 'package:locations_app/core/database/app_providers.dart';
 import 'package:locations_app/core/theme/app_theme.dart';
 import 'package:locations_app/core/widgets/aurora_card.dart';
@@ -119,7 +118,6 @@ void main() {
     final settings = appSettingsProvider.overrideWith(
       (ref) => Stream.value(
         const AppSetting(
-          id: 1,
           reminderLeadMonths: 1,
           currency: 'TND',
           onboardingDone: true,

@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-import '../database/app_database.dart';
+import '../database/app_providers.dart';
 
 const _channelId = 'contract_expiry';
 const _channelName = 'Expiration des contrats';
@@ -16,7 +17,7 @@ class NotificationService {
   bool _initialized = false;
 
   Future<void> init() async {
-    if (_initialized) return;
+    if (_initialized || kIsWeb) return;
     tz_data.initializeTimeZones();
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -38,6 +39,7 @@ class NotificationService {
   }
 
   Future<void> requestPermission() async {
+    if (kIsWeb) return;
     await _plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
@@ -51,6 +53,7 @@ class NotificationService {
   }
 
   Future<void> scheduleForContract(Contract contract, int leadMonths) async {
+    if (kIsWeb) return;
     await cancelForContract(contract.id);
 
     final now = DateTime.now();
@@ -93,6 +96,7 @@ class NotificationService {
   }
 
   Future<void> rescheduleAll(List<Contract> contracts, int leadMonths) async {
+    if (kIsWeb) return;
     await _plugin.cancelAll();
     for (final contract in contracts) {
       await scheduleForContract(contract, leadMonths);

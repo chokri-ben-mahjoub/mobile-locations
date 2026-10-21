@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/widgets/aurora_card.dart';

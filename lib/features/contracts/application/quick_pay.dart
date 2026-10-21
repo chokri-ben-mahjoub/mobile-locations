@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
 import 'contracts_providers.dart';

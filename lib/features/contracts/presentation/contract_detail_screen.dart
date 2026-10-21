@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/attachments/attachment_service.dart';
-import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/theme/app_theme.dart';
@@ -290,6 +289,10 @@ class ContractDetailScreen extends ConsumerWidget {
           ],
           const SizedBox(height: 20),
           _PaymentsSection(contract: c, currency: currency),
+          if (c.stegMeter != null || c.sonedeMeter != null) ...[
+            const SizedBox(height: 24),
+            _UtilityBillsSection(contract: c),
+          ],
           const SizedBox(height: 24),
           _AttachmentsSection(contractId: c.id),
           if (!c.archived) ...[
@@ -864,6 +867,147 @@ class _InfoTile extends StatelessWidget {
   }
 }
 
+class _UtilityBillsSection extends ConsumerStatefulWidget {
+  final Contract contract;
+
+  const _UtilityBillsSection({required this.contract});
+
+  @override
+  ConsumerState<_UtilityBillsSection> createState() => _UtilityBillsSectionState();
+}
+
+class _UtilityBillsSectionState extends ConsumerState<_UtilityBillsSection> {
+  late String _type = widget.contract.stegMeter != null ? 'steg' : 'sonede';
+  bool _expanded = false;
+
+  List<DateTime> _months() {
+    final c = widget.contract;
+    final now = DateTime.now();
+    final last = c.archived && c.endDate.isBefore(now) ? c.endDate : now;
+    var cursor = DateTime(last.year, last.month, 1);
+    final start = DateTime(c.startDate.year, c.startDate.month, 1);
+    final months = <DateTime>[];
+    while (!cursor.isBefore(start)) {
+      months.add(cursor);
+      cursor = DateTime(cursor.year, cursor.month - 1, 1);
+    }
+    return months;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final c = widget.contract;
+    final hasSteg = c.stegMeter != null;
+    final hasSonede = c.sonedeMeter != null;
+
+    final bills =
+        ref.watch(utilityBillsProvider((c.id, _type))).valueOrNull ?? [];
+    final byMonth = {for (final b in bills) b.month: b};
+
+    final months = _months();
+    final visibleMonths = _expanded ? months : months.take(6).toList();
+    final paidCount = months.where((m) => byMonth[m] != null).length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Factures STEG / SONEDE', style: Theme.of(context).textTheme.titleSmall),
+            const Spacer(),
+            Text(
+              '$paidCount/${months.length} réglées',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (hasSteg && hasSonede)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SegmentedButton<String>(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(
+                  value: 'steg',
+                  label: Text('STEG'),
+                  icon: Icon(Icons.bolt_rounded, size: 16),
+                ),
+                ButtonSegment(
+                  value: 'sonede',
+                  label: Text('SONEDE'),
+                  icon: Icon(Icons.water_drop_rounded, size: 16),
+                ),
+              ],
+              selected: {_type},
+              onSelectionChanged: (set) {
+                HapticFeedback.selectionClick();
+                setState(() => _type = set.first);
+              },
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Icon(
+                  hasSteg ? Icons.bolt_rounded : Icons.water_drop_rounded,
+                  size: 16,
+                  color: scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  hasSteg ? 'Compteur STEG ${c.stegMeter}' : 'Compteur SONEDE ${c.sonedeMeter}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final month in visibleMonths)
+              _MonthChip(
+                month: month,
+                paid: byMonth[month] != null,
+                onTap: () => _toggleMonth(month, byMonth[month]),
+                onLongPress: () => _toggleMonth(month, byMonth[month]),
+              ),
+          ],
+        ),
+        if (months.length > 6)
+          TextButton(
+            onPressed: () => setState(() => _expanded = !_expanded),
+            child: Text(_expanded ? 'Réduire' : 'Afficher tous les mois (${months.length})'),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _toggleMonth(DateTime month, UtilityBill? existing) async {
+    final controller = ref.read(utilityBillsControllerProvider);
+    if (existing != null) {
+      HapticFeedback.lightImpact();
+      await controller.markUnpaid(widget.contract.id, _type, month);
+    } else {
+      HapticFeedback.heavyImpact();
+      await controller.markPaid(
+        contractId: widget.contract.id,
+        type: _type,
+        month: month,
+        paidDate: DateTime.now(),
+      );
+    }
+  }
+}
+
 class _AttachmentsSection extends ConsumerWidget {
   final String contractId;
 
@@ -1040,8 +1184,8 @@ class _AttachmentThumb extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.file(
-              File(attachment.filePath),
+            child: Image.memory(
+              base64Decode(attachment.data),
               width: 80,
               height: 80,
               fit: BoxFit.cover,
@@ -1103,8 +1247,13 @@ class _AttachmentViewer extends ConsumerWidget {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.share_outlined, color: Colors.white),
-                  onPressed: () =>
-                      Share.shareXFiles([XFile(attachment.filePath)]),
+                  onPressed: () => Share.shareXFiles([
+                    XFile.fromData(
+                      base64Decode(attachment.data),
+                      name: '${attachment.category}.jpg',
+                      mimeType: 'image/jpeg',
+                    ),
+                  ]),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.white),
@@ -1115,7 +1264,7 @@ class _AttachmentViewer extends ConsumerWidget {
             ),
             Expanded(
               child: InteractiveViewer(
-                child: Center(child: Image.file(File(attachment.filePath))),
+                child: Center(child: Image.memory(base64Decode(attachment.data))),
               ),
             ),
           ],

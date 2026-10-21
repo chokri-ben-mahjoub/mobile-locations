@@ -1,18 +1,18 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'app_database.dart';
+import '../data/firestore_service.dart';
+import '../data/models.dart';
 
-final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase();
-  ref.onDispose(db.close);
-  return db;
+export '../data/models.dart';
+
+final firestoreServiceProvider = Provider<FirestoreService>((ref) {
+  return FirestoreService();
 });
 
 /// Flux des réglages de l'app (délai de rappel, devise, onboarding).
 final appSettingsProvider = StreamProvider<AppSetting>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchSettings();
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchSettings();
 });
 
 final reminderLeadMonthsProvider = Provider<int>((ref) {
@@ -29,52 +29,60 @@ final onboardingDoneProvider = Provider<bool>((ref) {
 
 /// Flux des contrats de location (triés par date de fin croissante).
 final contractsProvider = StreamProvider<List<Contract>>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchContracts();
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchContracts();
 });
 
 /// Flux des locaux en attente (ancien locataire sorti).
 final vacantContractsProvider = StreamProvider<List<Contract>>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchVacantContracts();
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchVacantContracts();
 });
 
 /// Tous les paiements enregistrés (alimente les analyses du portefeuille).
 final allPaymentsProvider = StreamProvider<List<Payment>>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchAllPayments();
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchAllPayments();
 });
 
 /// Historique des paiements d'un contrat donné.
 final paymentsForContractProvider =
     StreamProvider.family<List<Payment>, String>((ref, contractId) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchPaymentsForContract(contractId);
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchPaymentsForContract(contractId);
 });
 
 /// Historique complet des contrats (actifs + en attente) d'un local donné.
 final contractsForUnitProvider =
     StreamProvider.family<List<Contract>, String>((ref, unitNumber) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchContractsForUnit(unitNumber);
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchContractsForUnit(unitNumber);
 });
 
 /// Pièces jointes d'un contrat donné.
 final attachmentsForContractProvider =
     StreamProvider.family<List<Attachment>, String>((ref, contractId) {
-  final db = ref.watch(appDatabaseProvider);
-  return db.watchAttachmentsForContract(contractId);
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchAttachmentsForContract(contractId);
+});
+
+/// Historique des factures STEG/SONEDE d'un contrat donné.
+/// Clé : (contractId, type) avec type = 'steg' ou 'sonede'.
+final utilityBillsProvider =
+    StreamProvider.family<List<UtilityBill>, (String, String)>((ref, key) {
+  final service = ref.watch(firestoreServiceProvider);
+  return service.watchUtilityBills(key.$1, key.$2);
 });
 
 class OnboardingController {
-  final AppDatabase db;
-  OnboardingController(this.db);
+  final FirestoreService service;
+  OnboardingController(this.service);
 
   Future<void> complete() {
-    return db.updateSettings(const AppSettingsCompanion(onboardingDone: Value(true)));
+    return service.updateSettings(onboardingDone: true);
   }
 }
 
 final onboardingControllerProvider = Provider<OnboardingController>((ref) {
-  return OnboardingController(ref.watch(appDatabaseProvider));
+  return OnboardingController(ref.watch(firestoreServiceProvider));
 });

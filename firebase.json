@@ -1,0 +1,37 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "locatrack-app",
+          "appId": "1:804979571106:android:e10925639eba95a1c7dafb",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "locatrack-app",
+          "configurations": {
+            "android": "1:804979571106:android:e10925639eba95a1c7dafb",
+            "web": "1:804979571106:web:dddeb6cce7e7e10fc7dafb"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "site": "locatrack-app",
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

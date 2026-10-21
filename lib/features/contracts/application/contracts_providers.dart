@@ -1,16 +1,14 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/attachments/attachment_service.dart';
-import '../../../core/database/app_database.dart';
+import '../../../core/data/firestore_service.dart';
 import '../../../core/database/app_providers.dart';
-import '../../../core/utils/id_generator.dart';
 
 export '../../../core/database/app_providers.dart' show contractsProvider;
 
 class ContractsController {
-  final AppDatabase db;
-  ContractsController(this.db);
+  final FirestoreService service;
+  ContractsController(this.service);
 
   Future<String> create({
     required String tenantName,
@@ -22,17 +20,16 @@ class ContractsController {
     String? sonedeMeter,
     String notes = '',
   }) {
-    return db.createContract(ContractsCompanion.insert(
-      id: newId(),
+    return service.createContract(
       tenantName: tenantName,
       unitNumber: unitNumber,
       startDate: startDate,
       endDate: endDate,
       monthlyAmount: monthlyAmount,
-      stegMeter: Value(stegMeter),
-      sonedeMeter: Value(sonedeMeter),
-      notes: Value(notes),
-    ));
+      stegMeter: stegMeter,
+      sonedeMeter: sonedeMeter,
+      notes: notes,
+    );
   }
 
   Future<void> update(
@@ -46,37 +43,35 @@ class ContractsController {
     String? sonedeMeter,
     String notes = '',
   }) {
-    return db.updateContract(
+    return service.updateContract(
       id,
-      ContractsCompanion(
-        tenantName: Value(tenantName),
-        unitNumber: Value(unitNumber),
-        startDate: Value(startDate),
-        endDate: Value(endDate),
-        monthlyAmount: Value(monthlyAmount),
-        stegMeter: Value(stegMeter),
-        sonedeMeter: Value(sonedeMeter),
-        notes: Value(notes),
-      ),
+      tenantName: tenantName,
+      unitNumber: unitNumber,
+      startDate: startDate,
+      endDate: endDate,
+      monthlyAmount: monthlyAmount,
+      stegMeter: stegMeter,
+      sonedeMeter: sonedeMeter,
+      notes: notes,
     );
   }
 
   /// Le locataire est sorti : clôture le contrat et met le local en attente.
-  Future<void> markVacant(String id) => db.setContractVacant(id, true);
+  Future<void> markVacant(String id) => service.setContractVacant(id, true);
 
   /// Réactive un local précédemment mis en attente.
-  Future<void> reactivate(String id) => db.setContractVacant(id, false);
+  Future<void> reactivate(String id) => service.setContractVacant(id, false);
 
-  Future<void> delete(String id) => db.deleteContract(id);
+  Future<void> delete(String id) => service.deleteContract(id);
 }
 
 final contractsControllerProvider = Provider<ContractsController>((ref) {
-  return ContractsController(ref.watch(appDatabaseProvider));
+  return ContractsController(ref.watch(firestoreServiceProvider));
 });
 
 class PaymentsController {
-  final AppDatabase db;
-  PaymentsController(this.db);
+  final FirestoreService service;
+  PaymentsController(this.service);
 
   Future<void> markPaid({
     required String contractId,
@@ -85,7 +80,7 @@ class PaymentsController {
     required DateTime paidDate,
     String notes = '',
   }) {
-    return db.markMonthPaid(
+    return service.markMonthPaid(
       contractId: contractId,
       month: month,
       amount: amount,
@@ -95,14 +90,43 @@ class PaymentsController {
   }
 
   Future<void> markUnpaid(String contractId, DateTime month) {
-    return db.markMonthUnpaid(contractId, month);
+    return service.markMonthUnpaid(contractId, month);
   }
 }
 
 final paymentsControllerProvider = Provider<PaymentsController>((ref) {
-  return PaymentsController(ref.watch(appDatabaseProvider));
+  return PaymentsController(ref.watch(firestoreServiceProvider));
 });
 
 final attachmentServiceProvider = Provider<AttachmentService>((ref) {
-  return AttachmentService(ref.watch(appDatabaseProvider));
+  return AttachmentService(ref.watch(firestoreServiceProvider));
+});
+
+class UtilityBillsController {
+  final FirestoreService service;
+  UtilityBillsController(this.service);
+
+  Future<void> markPaid({
+    required String contractId,
+    required String type,
+    required DateTime month,
+    double? amount,
+    required DateTime paidDate,
+  }) {
+    return service.markUtilityPaid(
+      contractId: contractId,
+      type: type,
+      month: month,
+      amount: amount,
+      paidDate: paidDate,
+    );
+  }
+
+  Future<void> markUnpaid(String contractId, String type, DateTime month) {
+    return service.markUtilityUnpaid(contractId, type, month);
+  }
+}
+
+final utilityBillsControllerProvider = Provider<UtilityBillsController>((ref) {
+  return UtilityBillsController(ref.watch(firestoreServiceProvider));
 });

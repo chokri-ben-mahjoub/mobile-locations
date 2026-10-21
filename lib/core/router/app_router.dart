@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/presentation/analytics_screen.dart';
+import '../../features/auth/presentation/cloud_login_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/auth/presentation/passcode_screen.dart';
@@ -11,17 +12,26 @@ import '../../features/contracts/presentation/contracts_screen.dart';
 import '../../features/contracts/presentation/unit_history_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../auth/auth_providers.dart';
+import '../auth/firebase_auth_providers.dart';
 import '../database/app_providers.dart';
 import 'scaffold_with_nav.dart';
 
-const _authFreeLocations = {'/onboarding', '/login', '/login/verify', '/login/create'};
+const _authFreeLocations = {
+  '/cloud-login',
+  '/onboarding',
+  '/login',
+  '/login/verify',
+  '/login/create',
+};
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final firebaseSignedIn = ref.watch(firebaseSignedInProvider);
   final onboardingDone = ref.watch(onboardingDoneProvider);
   final pinSet = ref.watch(pinSetProvider);
   final sessionAuthenticated = ref.watch(sessionAuthenticatedProvider);
 
   String initialLocation() {
+    if (!firebaseSignedIn) return '/cloud-login';
     if (!onboardingDone) return '/onboarding';
     if (!pinSet) return '/login/create';
     if (!sessionAuthenticated) return '/login';
@@ -32,6 +42,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: initialLocation(),
     redirect: (context, state) {
       final loc = state.matchedLocation;
+      if (!firebaseSignedIn) {
+        return loc == '/cloud-login' ? null : '/cloud-login';
+      }
       if (!onboardingDone) {
         return loc == '/onboarding' ? null : '/onboarding';
       }
@@ -46,6 +59,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/cloud-login',
+        builder: (context, state) => const CloudLoginScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),

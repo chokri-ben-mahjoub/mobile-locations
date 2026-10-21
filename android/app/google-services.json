@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "804979571106",
+    "project_id": "locatrack-app",
+    "storage_bucket": "locatrack-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804979571106:android:e10925639eba95a1c7dafb",
+        "android_client_info": {
+          "package_name": "com.locatrack.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6rrBKhIM8AR89Hv_jljepzCZL9hN_z3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

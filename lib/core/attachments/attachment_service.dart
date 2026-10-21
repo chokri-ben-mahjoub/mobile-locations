@@ -1,49 +1,42 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
-import '../database/app_database.dart';
-import '../utils/id_generator.dart';
+import '../data/firestore_service.dart';
+import '../data/models.dart';
 
 class AttachmentService {
-  final AppDatabase db;
+  final FirestoreService service;
   final ImagePicker _picker = ImagePicker();
 
-  AttachmentService(this.db);
+  AttachmentService(this.service);
 
-  /// Ouvre la caméra ou la galerie, copie l'image dans le dossier de l'app
-  /// et enregistre la pièce jointe pour ce contrat. Retourne false si
+  /// Ouvre la caméra ou la galerie, compresse l'image et l'enregistre
+  /// directement dans Firestore (encodée en base64 — pas de Firebase
+  /// Storage, qui exige le forfait payant). Retourne false si
   /// l'utilisateur a annulé.
   Future<bool> captureAndSave({
     required String contractId,
     required String category,
     required ImageSource source,
   }) async {
-    final picked = await _picker.pickImage(source: source, imageQuality: 85);
+    final picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 60,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    );
     if (picked == null) return false;
 
-    final dir = await getApplicationDocumentsDirectory();
-    final attachmentsDir = Directory('${dir.path}/attachments/$contractId');
-    if (!await attachmentsDir.exists()) {
-      await attachmentsDir.create(recursive: true);
-    }
+    final bytes = await picked.readAsBytes();
+    final data = base64Encode(bytes);
 
-    final id = newId();
-    final ext = picked.path.split('.').last;
-    final destPath = '${attachmentsDir.path}/$id.$ext';
-    await File(picked.path).copy(destPath);
-
-    await db.addAttachment(contractId: contractId, category: category, filePath: destPath);
+    await service.addAttachment(contractId: contractId, category: category, data: data);
     return true;
   }
 
-  Future<void> delete(Attachment attachment) async {
-    await db.deleteAttachment(attachment.id);
-    final file = File(attachment.filePath);
-    if (await file.exists()) {
-      await file.delete();
-    }
+  Future<void> delete(Attachment attachment) {
+    return service.deleteAttachment(attachment.id);
   }
 }
 

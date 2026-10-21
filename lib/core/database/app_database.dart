@@ -235,6 +235,8 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<Payment>> getAllPayments() => select(payments).get();
 
+  Future<List<Attachment>> getAllAttachments() => select(attachments).get();
+
   /// Remplace toutes les données existantes par celles d'une sauvegarde.
   Future<void> restoreAll({
     required AppSettingsCompanion settings,

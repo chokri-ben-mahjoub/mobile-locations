@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-import '../database/app_database.dart';
+import '../database/app_providers.dart';
 import 'format_utils.dart';
 
 String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

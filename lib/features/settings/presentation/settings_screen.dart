@@ -1,7 +1,5 @@
-import 'dart:io';
-
-import 'package:drift/drift.dart' show Value;
-import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,16 +7,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
-import '../../../core/backup/backup_service.dart';
-import '../../../core/database/app_database.dart';
+import '../../../core/auth/firebase_auth_providers.dart';
 import '../../../core/database/app_providers.dart';
+import '../../../core/export/export_service.dart';
+import '../../../core/migration/legacy_migration.dart';
 import '../../../core/theme/theme_providers.dart';
 import '../../../core/widgets/aurora_card.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
 
-const _appVersion = 'v1.3.0';
+const _appVersion = 'v1.4.0';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -27,7 +26,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider).valueOrNull;
     final themeMode = ref.watch(themeModeProvider);
-    final db = ref.read(appDatabaseProvider);
+    final service = ref.read(firestoreServiceProvider);
     final leadMonths = settings?.reminderLeadMonths ?? 1;
     final scheme = Theme.of(context).colorScheme;
     final pad = MediaQuery.of(context).padding;
@@ -72,9 +71,7 @@ class SettingsScreen extends ConsumerWidget {
                     selected: {leadMonths},
                     onSelectionChanged: (set) {
                       HapticFeedback.selectionClick();
-                      db.updateSettings(
-                        AppSettingsCompanion(reminderLeadMonths: Value(set.first)),
-                      );
+                      service.updateSettings(reminderLeadMonths: set.first);
                     },
                   ),
                 ),
@@ -89,9 +86,7 @@ class SettingsScreen extends ConsumerWidget {
                   onFieldSubmitted: (v) {
                     final months = int.tryParse(v.trim());
                     if (months != null && months > 0) {
-                      db.updateSettings(
-                        AppSettingsCompanion(reminderLeadMonths: Value(months)),
-                      );
+                      service.updateSettings(reminderLeadMonths: months);
                     }
                   },
                 ),
@@ -139,7 +134,13 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 14),
           const Reveal(delay: 160, child: _SecuritySection()),
           const SizedBox(height: 14),
-          const Reveal(delay: 210, child: _BackupSection()),
+          const Reveal(delay: 185, child: _ExportSection()),
+          const SizedBox(height: 14),
+          const Reveal(delay: 210, child: _AccountSection()),
+          if (!kIsWeb) ...[
+            const SizedBox(height: 14),
+            const Reveal(delay: 260, child: _MigrationSection()),
+          ],
         ],
       ),
     );
@@ -201,7 +202,7 @@ class _AboutHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Vos données restent sur cet appareil.',
+                  'Synchronisé entre mobile et web.',
                   style: text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
                 ),
               ],
@@ -281,34 +282,188 @@ class _SecuritySection extends ConsumerWidget {
   }
 }
 
-class _BackupSection extends ConsumerStatefulWidget {
-  const _BackupSection();
+class _AccountSection extends ConsumerWidget {
+  const _AccountSection();
 
   @override
-  ConsumerState<_BackupSection> createState() => _BackupSectionState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final user = ref.watch(firebaseAuthStateProvider).valueOrNull;
+
+    return SectionCard(
+      title: 'Compte',
+      icon: Icons.cloud_outlined,
+      children: [
+        Text(
+          'Connecté en tant que',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          user?.email ?? '—',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: OutlinedButton.icon(
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Se déconnecter ?'),
+                  content: const Text(
+                    'Vous devrez ressaisir l\'e-mail et le mot de passe '
+                    'du compte pour retrouver vos données.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Annuler'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Se déconnecter'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true) {
+                await FirebaseAuth.instance.signOut();
+              }
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: scheme.error,
+              side: BorderSide(color: scheme.error.withValues(alpha: 0.4)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            icon: const Icon(Icons.logout_rounded),
+            label: const Text(
+              'Se déconnecter',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _BackupSectionState extends ConsumerState<_BackupSection> {
+/// Import ponctuel des anciennes données locales (avant le passage au
+/// stockage cloud) vers Firestore / Firebase Storage. Ne s'affiche que s'il
+/// reste des données dans l'ancienne base locale de l'appareil.
+class _MigrationSection extends ConsumerStatefulWidget {
+  const _MigrationSection();
+
+  @override
+  ConsumerState<_MigrationSection> createState() => _MigrationSectionState();
+}
+
+class _MigrationSectionState extends ConsumerState<_MigrationSection> {
+  final _service = LegacyMigrationService();
+  bool _migrating = false;
+  bool? _hasLocalData;
+
+  @override
+  void initState() {
+    super.initState();
+    _service.hasLocalData().then((has) {
+      if (mounted) setState(() => _hasLocalData = has);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasLocalData != true) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+
+    return SectionCard(
+      title: 'Anciennes données locales',
+      icon: Icons.sync_alt_rounded,
+      children: [
+        Text(
+          'Des contrats enregistrés avant le passage au cloud ont été '
+          'détectés sur cet appareil. Importez-les une fois vers le compte '
+          'partagé pour les retrouver sur tous vos appareils.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: FilledButton.icon(
+            onPressed: _migrating ? null : _migrate,
+            icon: _migrating
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.cloud_upload_outlined),
+            label: Text(
+              _migrating ? 'Import en cours…' : 'Importer vers le cloud',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _migrate() async {
+    setState(() => _migrating = true);
+    try {
+      final count = await _service.migrateTo(ref.read(firestoreServiceProvider));
+      if (mounted) {
+        setState(() => _hasLocalData = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$count éléments importés avec succès.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'import : $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _migrating = false);
+    }
+  }
+}
+
+class _ExportSection extends ConsumerStatefulWidget {
+  const _ExportSection();
+
+  @override
+  ConsumerState<_ExportSection> createState() => _ExportSectionState();
+}
+
+class _ExportSectionState extends ConsumerState<_ExportSection> {
   bool _exporting = false;
-  bool _restoring = false;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
     return SectionCard(
-      title: 'Sauvegarde',
-      icon: Icons.backup_outlined,
+      title: 'Export',
+      icon: Icons.table_chart_outlined,
       children: [
         Text(
-          'Les données sont stockées uniquement sur cet appareil. '
-          'Exportez une sauvegarde régulièrement pour ne rien perdre en cas '
-          'de changement de téléphone.',
+          'Exportez tous les contrats (actifs et en attente) en CSV, Excel, '
+          'PDF ou image — les noms de locataires en arabe s\'affichent '
+          'correctement dans les 4 formats.',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         SizedBox(
           width: double.infinity,
           height: 50,
@@ -320,33 +475,9 @@ class _BackupSectionState extends ConsumerState<_BackupSection> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.upload_rounded),
+                : const Icon(Icons.ios_share_rounded),
             label: const Text(
-              'Exporter une sauvegarde',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: OutlinedButton.icon(
-            onPressed: _restoring ? null : _restore,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: scheme.error,
-              side: BorderSide(color: scheme.error.withValues(alpha: 0.4)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-            icon: _restoring
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.download_rounded),
-            label: const Text(
-              'Restaurer une sauvegarde',
+              'Exporter / partager',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
@@ -356,10 +487,20 @@ class _BackupSectionState extends ConsumerState<_BackupSection> {
   }
 
   Future<void> _export() async {
+    final format = await chooseExportFormat(context);
+    if (format == null || !mounted) return;
+
     setState(() => _exporting = true);
     try {
-      final service = BackupService(ref.read(appDatabaseProvider));
-      await service.shareBackup();
+      final active = ref.read(contractsProvider).valueOrNull ?? [];
+      final vacant = ref.read(vacantContractsProvider).valueOrNull ?? [];
+      final currency = ref.read(currencyProvider);
+      await ContractsExportService.export(
+        context: context,
+        format: format,
+        contracts: [...active, ...vacant],
+        currency: currency,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -370,55 +511,5 @@ class _BackupSectionState extends ConsumerState<_BackupSection> {
       if (mounted) setState(() => _exporting = false);
     }
   }
-
-  Future<void> _restore() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    final path = result?.files.single.path;
-    if (path == null || !mounted) return;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Restaurer cette sauvegarde ?'),
-        content: const Text(
-          'Tous les contrats, paiements et réglages actuels seront '
-          'remplacés par le contenu de ce fichier. Cette action est '
-          'irréversible.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Restaurer'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    setState(() => _restoring = true);
-    try {
-      final service = BackupService(ref.read(appDatabaseProvider));
-      await service.restoreFromFile(File(path));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sauvegarde restaurée avec succès.')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de la restauration : $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _restoring = false);
-    }
-  }
 }
+

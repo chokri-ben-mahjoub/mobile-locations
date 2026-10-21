@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/analytics/portfolio_stats.dart';
-import '../../../core/database/app_database.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/format_utils.dart';

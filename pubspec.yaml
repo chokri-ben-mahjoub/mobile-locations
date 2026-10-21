@@ -45,8 +45,17 @@ dependencies:
   share_plus: ^10.1.4
   file_picker: ^10.3.3
 
+  # Export des contrats (CSV / Excel / PDF / image)
+  excel: ^4.0.6
+  pdf: ^3.11.3
+
   # Pièces jointes (photos contrat, CIN, état des lieux...)
   image_picker: ^1.1.2
+
+  # Firebase (synchronisation cloud mobile + web, forfait gratuit Spark)
+  firebase_core: ^3.8.0
+  cloud_firestore: ^5.5.0
+  firebase_auth: ^5.3.3
 
 dev_dependencies:
   flutter_test:
@@ -73,3 +82,8 @@ flutter:
           weight: 700
         - asset: assets/fonts/Inter-ExtraBold.ttf
           weight: 800
+
+  # Police arabe embarquée (export PDF des noms de locataires, licence SIL
+  # OFL : assets/fonts/LICENSE-NotoNaskhArabic.txt), 100 % hors ligne.
+  assets:
+    - assets/fonts/NotoNaskhArabic-Regular.ttf

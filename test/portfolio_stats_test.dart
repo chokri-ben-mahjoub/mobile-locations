@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:locations_app/core/analytics/portfolio_stats.dart';
-import 'package:locations_app/core/database/app_database.dart';
 import 'package:locations_app/core/database/app_providers.dart';
 import 'package:locations_app/features/analytics/presentation/analytics_screen.dart';
 
