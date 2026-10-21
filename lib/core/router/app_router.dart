@@ -15,7 +15,6 @@ import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/tenants/presentation/tenants_overview_screen.dart';
 import '../auth/auth_providers.dart';
 import '../auth/firebase_auth_providers.dart';
-import '../database/app_providers.dart';
 import 'scaffold_with_nav.dart';
 
 const _authFreeLocations = {

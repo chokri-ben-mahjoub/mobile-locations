@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _pinHashKey = 'auth_pin_hash';
 const _biometricEnabledKey = 'auth_biometric_enabled';
+const _onboardingDoneKey = 'onboarding_done';
 
 String hashPin(String pin) =>
     sha256.convert(utf8.encode('locatrack::$pin')).toString();
@@ -62,8 +63,34 @@ final biometricEnabledProvider =
 /// Session déverrouillée : repasse à false à chaque redémarrage de l'app.
 final sessionAuthenticatedProvider = StateProvider<bool>((ref) => false);
 
+/// Onboarding terminé (écran "Bienvenue" vu et validé) : réglage 100% local
+/// (SharedPreferences), pas synchronisé via le cloud. Écrire ce drapeau
+/// dans Firestore faisait dépendre la navigation post-onboarding d'un
+/// aller-retour réseau — si la connexion était lente/coupée au mauvais
+/// moment, l'écran restait bloqué indéfiniment sur le bouton "Commencer".
+class OnboardingController extends StateNotifier<bool> {
+  OnboardingController() : super(false);
+
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getBool(_onboardingDoneKey) ?? false;
+  }
+
+  Future<void> complete() async {
+    state = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingDoneKey, true);
+  }
+}
+
+final onboardingControllerProvider =
+    StateNotifierProvider<OnboardingController, bool>((ref) => OnboardingController());
+
+final onboardingDoneProvider = Provider<bool>((ref) => ref.watch(onboardingControllerProvider));
+
 /// Garantit que l'état d'authentification local est chargé avant de router.
 final authReadyProvider = FutureProvider<void>((ref) async {
   await ref.read(pinControllerProvider.notifier).load();
   await ref.read(biometricEnabledProvider.notifier).load();
+  await ref.read(onboardingControllerProvider.notifier).load();
 });

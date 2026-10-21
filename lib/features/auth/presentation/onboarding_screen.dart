@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:locations_app/l10n/app_localizations.dart';
 
-import '../../../core/database/app_providers.dart';
+import '../../../core/auth/auth_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glow_background.dart';
 import '../../../core/widgets/reveal.dart';
@@ -153,8 +153,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _confirm() async {
     HapticFeedback.lightImpact();
     setState(() => _saving = true);
-    await ref.read(onboardingControllerProvider).complete();
-    if (!mounted) return;
+    // `complete()` met à jour l'état local immédiatement (avant d'écrire
+    // dans SharedPreferences) : pas la peine d'attendre l'écriture disque
+    // pour avancer, et surtout plus aucune dépendance réseau ici (c'est ce
+    // qui bloquait "Commencer" indéfiniment quand la connexion était
+    // lente/coupée — l'ancien code attendait une écriture Firestore).
+    ref.read(onboardingControllerProvider.notifier).complete();
     context.go('/login/create');
   }
 }

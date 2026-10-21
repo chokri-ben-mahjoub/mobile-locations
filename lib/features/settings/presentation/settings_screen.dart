@@ -20,7 +20,7 @@ import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
 
 // Garder synchronisé avec `version:` dans pubspec.yaml à chaque changement.
-const _appVersion = 'v1.5.0';
+const _appVersion = 'v1.5.1';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});

@@ -23,10 +23,6 @@ final currencyProvider = Provider<String>((ref) {
   return ref.watch(appSettingsProvider).valueOrNull?.currency ?? 'TND';
 });
 
-final onboardingDoneProvider = Provider<bool>((ref) {
-  return ref.watch(appSettingsProvider).valueOrNull?.onboardingDone ?? false;
-});
-
 /// Flux des contrats de location (triés par date de fin croissante).
 final contractsProvider = StreamProvider<List<Contract>>((ref) {
   final service = ref.watch(firestoreServiceProvider);
@@ -79,17 +75,4 @@ final utilityBillsProvider =
     StreamProvider.family<List<UtilityBill>, (String, String)>((ref, key) {
   final service = ref.watch(firestoreServiceProvider);
   return service.watchUtilityBills(key.$1, key.$2);
-});
-
-class OnboardingController {
-  final FirestoreService service;
-  OnboardingController(this.service);
-
-  Future<void> complete() {
-    return service.updateSettings(onboardingDone: true);
-  }
-}
-
-final onboardingControllerProvider = Provider<OnboardingController>((ref) {
-  return OnboardingController(ref.watch(firestoreServiceProvider));
 });
