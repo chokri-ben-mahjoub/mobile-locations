@@ -7,6 +7,7 @@ import 'package:locations_app/l10n/app_localizations.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/widgets/aurora_card.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
@@ -170,6 +171,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               ? 'Nouveau locataire — ${widget.prefillUnitNumber}'
               : 'Nouveau contrat',
         ),
+        actions: const [LanguageIconButton()],
       ),
       body: Form(
         key: _formKey,

@@ -16,6 +16,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/receipt.dart';
 import '../../../core/widgets/aurora_card.dart';
 import '../../../core/widgets/charts.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../application/contracts_providers.dart';
 
@@ -112,6 +113,7 @@ class ContractDetailScreen extends ConsumerWidget {
           textDirection: isArabicText(c.tenantName) ? TextDirection.rtl : TextDirection.ltr,
         ),
         actions: [
+          const LanguageIconButton(),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: () => context.push('/contracts/${c.id}/edit'),

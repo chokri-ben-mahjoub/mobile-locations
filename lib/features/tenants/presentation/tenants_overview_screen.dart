@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/arabic_text.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/shimmer.dart';
 
@@ -71,12 +72,19 @@ class TenantsOverviewScreen extends ConsumerWidget {
       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       padding: EdgeInsets.fromLTRB(16, pad.top + 14, 16, 24 + pad.bottom),
       children: [
-        Text(
-          'Locataires',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.6,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Locataires',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.6,
+                    ),
               ),
+            ),
+            const LanguageIconButton(),
+          ],
         ),
         const SizedBox(height: 4),
         Text(

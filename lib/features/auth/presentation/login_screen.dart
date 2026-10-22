@@ -7,6 +7,7 @@ import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glow_background.dart';
+import '../../../core/widgets/language_switcher.dart';
 import 'widgets/feature_carousel.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -68,11 +69,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: GlowBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-            child: Column(
-              children: [
-                const _Brand(),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                child: Column(
+                  children: [
+                    const _Brand(),
                 const SizedBox(height: 8),
                 Text(
                   l10n.appTagline,
@@ -155,8 +158,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+              const Positioned(top: 0, right: 0, child: LanguageIconButton()),
+            ],
           ),
         ),
       ),

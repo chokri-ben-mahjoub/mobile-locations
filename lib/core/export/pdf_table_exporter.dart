@@ -112,7 +112,7 @@ class PdfTableExporter {
               final text = _cell(data);
               if (!isArabicText(text)) return null;
               return pw.Text(
-                text,
+                mirrorBracketsForRtl(text),
                 textDirection: pw.TextDirection.rtl,
                 textAlign: pw.TextAlign.right,
                 style: textStyle.copyWith(fontSize: fontSize),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../core/widgets/language_switcher.dart';
 
 /// Historique de tous les locataires qui sont passés par un local donné.
 class UnitHistoryScreen extends ConsumerWidget {
@@ -18,7 +19,10 @@ class UnitHistoryScreen extends ConsumerWidget {
     final history = ref.watch(contractsForUnitProvider(unitNumber)).valueOrNull ?? [];
 
     return Scaffold(
-      appBar: AppBar(title: Text('Historique — $unitNumber')),
+      appBar: AppBar(
+        title: Text('Historique — $unitNumber'),
+        actions: const [LanguageIconButton()],
+      ),
       body: history.isEmpty
           ? const Center(child: Text('Aucun historique pour ce local.'))
           : ListView.builder(

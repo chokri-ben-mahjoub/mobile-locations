@@ -15,12 +15,13 @@ import '../../../core/migration/legacy_migration.dart';
 import '../../../core/theme/locale_providers.dart';
 import '../../../core/theme/theme_providers.dart';
 import '../../../core/widgets/aurora_card.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
 
 // Garder synchronisé avec `version:` dans pubspec.yaml à chaque changement.
-const _appVersion = 'v1.5.1';
+const _appVersion = 'v1.6.0';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -41,12 +42,19 @@ class SettingsScreen extends ConsumerWidget {
         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         padding: EdgeInsets.fromLTRB(16, pad.top + 14, 16, 150 + pad.bottom),
         children: [
-          Text(
-            l10n.settingsTitle,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.6,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.settingsTitle,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.6,
+                      ),
                 ),
+              ),
+              const LanguageIconButton(),
+            ],
           ),
           const SizedBox(height: 16),
           const Reveal(child: _AboutHero()),
