@@ -28,6 +28,7 @@ class LanguageIconButton extends ConsumerWidget {
 
 /// Feuille de choix de langue (Système / Français / English / العربية),
 /// partagée entre l'icône globe globale et la section "Langue" de Réglages.
+/// Se ferme automatiquement dès qu'une langue est choisie.
 Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) {
   final l10n = AppLocalizations.of(context);
   return showModalBottomSheet(
@@ -35,38 +36,37 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) {
     builder: (sheetContext) => Consumer(
       builder: (sheetContext, ref, _) {
         final locale = ref.watch(localeControllerProvider);
+        final scheme = Theme.of(sheetContext).colorScheme;
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.settingsLanguage,
-                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    l10n.settingsLanguage,
+                    style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final option in [
-                      (null, l10n.languageSystem),
-                      (const Locale('fr'), 'Français'),
-                      (const Locale('en'), 'English'),
-                      (const Locale('ar'), 'العربية'),
-                    ])
-                      ChoiceChip(
-                        label: Text(option.$2),
-                        selected: locale == option.$1,
-                        onSelected: (_) {
-                          HapticFeedback.selectionClick();
-                          ref.read(localeControllerProvider.notifier).set(option.$1);
-                        },
-                      ),
-                  ],
-                ),
+                const SizedBox(height: 8),
+                for (final option in [
+                  (null, l10n.languageSystem),
+                  (const Locale('fr'), 'Français'),
+                  (const Locale('en'), 'English'),
+                  (const Locale('ar'), 'العربية'),
+                ])
+                  ListTile(
+                    title: Text(option.$2),
+                    trailing: locale == option.$1 ? Icon(Icons.check_rounded, color: scheme.primary) : null,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      ref.read(localeControllerProvider.notifier).set(option.$1);
+                      Navigator.of(sheetContext).pop();
+                    },
+                  ),
               ],
             ),
           ),

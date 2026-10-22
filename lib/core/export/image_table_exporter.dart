@@ -5,9 +5,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../theme/app_theme.dart';
 import 'export_table.dart';
+
+// Mêmes couleurs que le PDF/Excel — rouge = expiré, jaune = en attente.
+const _expiredRowColor = Color(0xFFF4C7C7);
+const _pendingRowColor = Color(0xFFFCE588);
 
 /// Capture un [ExportTable] sous forme d'image PNG (comme une capture
 /// d'écran d'un tableau Excel) — pratique pour partager rapidement sur
@@ -26,6 +31,7 @@ class ImageTableExporter {
     required BuildContext context,
     required ExportTable table,
     required String title,
+    AppLocalizations? l10n,
     double pixelRatio = 2.5,
   }) async {
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -44,7 +50,7 @@ class ImageTableExporter {
           color: Colors.transparent,
           child: RepaintBoundary(
             key: boundaryKey,
-            child: _TableCard(table: table, title: title, dateFormat: _dateFormat),
+            child: _TableCard(table: table, title: title, dateFormat: _dateFormat, l10n: l10n),
           ),
         ),
       ),
@@ -73,11 +79,23 @@ class ImageTableExporter {
 }
 
 class _TableCard extends StatelessWidget {
-  const _TableCard({required this.table, required this.title, required this.dateFormat});
+  const _TableCard({required this.table, required this.title, required this.dateFormat, this.l10n});
 
   final ExportTable table;
   final String title;
   final DateFormat dateFormat;
+  final AppLocalizations? l10n;
+
+  Color? _rowColor(int rowIndex) {
+    final l10n = this.l10n;
+    if (l10n == null) return null;
+    final statusColumn = table.headers.indexOf(l10n.exportColStatus);
+    if (statusColumn == -1 || statusColumn >= table.rows[rowIndex].length) return null;
+    final status = table.rows[rowIndex][statusColumn]?.toString();
+    if (status == l10n.statusExpired) return _expiredRowColor;
+    if (status == l10n.statusPending) return _pendingRowColor;
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +138,9 @@ class _TableCard extends StatelessWidget {
                 ),
                 for (final (i, row) in table.rows.indexed)
                   TableRow(
-                    decoration: BoxDecoration(color: i.isEven ? Colors.white : const Color(0xFFF5F8F8)),
+                    decoration: BoxDecoration(
+                      color: _rowColor(i) ?? (i.isEven ? Colors.white : const Color(0xFFF5F8F8)),
+                    ),
                     children: [for (final value in row) _cell(_format(value))],
                   ),
               ],

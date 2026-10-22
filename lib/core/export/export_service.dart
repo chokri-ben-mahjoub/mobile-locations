@@ -86,7 +86,7 @@ class ContractsExportService {
       case ExportFormat.csv:
         file = ShareableFile('${baseName}_$datePart.csv', 'text/csv', CsvExporter.encode(table));
       case ExportFormat.excel:
-        final bytes = ExcelExporter.encode(table);
+        final bytes = ExcelExporter.encode(table, l10n: l10n);
         if (bytes == null) {
           throw Exception(l10n.excelGenerationFailed);
         }
@@ -96,14 +96,14 @@ class ContractsExportService {
           bytes,
         );
       case ExportFormat.pdf:
-        final bytes = await PdfTableExporter.encode(table, title: title);
+        final bytes = await PdfTableExporter.encode(table, title: title, l10n: l10n);
         file = ShareableFile('${baseName}_$datePart.pdf', 'application/pdf', bytes);
       case ExportFormat.image:
         if (!context.mounted) {
           throw Exception('Screen closed before the export finished.');
         }
         // ignore: use_build_context_synchronously
-        final bytes = await ImageTableExporter.capture(context: context, table: table, title: title);
+        final bytes = await ImageTableExporter.capture(context: context, table: table, title: title, l10n: l10n);
         file = ShareableFile('${baseName}_$datePart.png', 'image/png', bytes);
     }
 

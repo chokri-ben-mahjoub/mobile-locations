@@ -11,6 +11,7 @@ import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
+import '../../../core/widgets/web_content_constraint.dart';
 import '../application/contracts_providers.dart';
 
 /// Formulaire d'ajout (contractId == null) ou de modification d'un contrat.
@@ -173,7 +174,8 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
         ),
         actions: const [LanguageIconButton()],
       ),
-      body: Form(
+      body: WebContentConstraint(
+        child: Form(
         key: _formKey,
         child: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -382,6 +384,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

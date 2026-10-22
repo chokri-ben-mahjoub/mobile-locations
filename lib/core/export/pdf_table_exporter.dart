@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -11,6 +12,11 @@ import 'export_table.dart';
 const _navy = PdfColor.fromInt(0xFF0B1E2D);
 const _accent = PdfColor.fromInt(0xFF1F6F78); // accentColor de AppTheme
 const _grey = PdfColor.fromInt(0xFF757575);
+
+// Fonds de ligne par statut — mêmes couleurs que le tableau papier
+// d'origine (rouge = expiré/urgent, jaune = en attente, blanc = actif).
+const _expiredRowColor = PdfColor.fromInt(0xFFF4C7C7);
+const _pendingRowColor = PdfColor.fromInt(0xFFFCE588);
 
 /// Document PDF pour un [ExportTable] (export des contrats).
 ///
@@ -44,8 +50,24 @@ class PdfTableExporter {
   static Future<Uint8List> encode(
     ExportTable table, {
     required String title,
+    AppLocalizations? l10n,
   }) async {
     await _ensureFontsLoaded();
+
+    // Colore chaque ligne selon son statut (colonne "Statut") — permet de
+    // repérer d'un coup d'œil les contrats expirés/en attente, comme sur
+    // le tableau papier d'origine.
+    final statusColumn = l10n == null ? -1 : table.headers.indexOf(l10n.exportColStatus);
+    PdfColor? rowColorFor(int rowNum) {
+      // `rowNum` compte la ligne d'en-tête (headerCount, 1 par défaut) :
+      // la première ligne de données a rowNum == 1, pas 0.
+      final index = rowNum - 1;
+      if (statusColumn == -1 || index < 0 || index >= table.rows.length) return null;
+      final status = table.rows[index][statusColumn]?.toString();
+      if (status == l10n!.statusExpired) return _expiredRowColor;
+      if (status == l10n.statusPending) return _pendingRowColor;
+      return null;
+    }
 
     final textStyle = pw.TextStyle(font: _latinFont, fontFallback: [_arabicFont!]);
     final boldStyle = pw.TextStyle(font: _latinBoldFont, fontFallback: [_arabicFont!]);
@@ -99,6 +121,10 @@ class PdfTableExporter {
             cellStyle: textStyle.copyWith(fontSize: fontSize),
             cellPadding: cellPadding,
             cellAlignment: pw.Alignment.centerLeft,
+            cellDecoration: (columnIndex, data, rowNum) {
+              final color = rowColorFor(rowNum);
+              return pw.BoxDecoration(color: color);
+            },
             // La mise en forme arabe (jointure des lettres + ordre de
             // lecture) n'est appliquée par le moteur `pdf` que sur un
             // `Text` dont `textDirection` vaut `rtl` — sans ça, même avec
@@ -111,11 +137,14 @@ class PdfTableExporter {
             cellBuilder: (columnIndex, data, rowNum) {
               final text = _cell(data);
               if (!isArabicText(text)) return null;
-              return pw.Text(
-                mirrorBracketsForRtl(text),
-                textDirection: pw.TextDirection.rtl,
-                textAlign: pw.TextAlign.right,
-                style: textStyle.copyWith(fontSize: fontSize),
+              return pw.Align(
+                alignment: pw.Alignment.centerRight,
+                child: pw.Text(
+                  mirrorBracketsForRtl(text),
+                  textDirection: pw.TextDirection.rtl,
+                  textAlign: pw.TextAlign.right,
+                  style: textStyle.copyWith(fontSize: fontSize),
+                ),
               );
             },
             data: [for (final row in table.rows) row.map(_cell).toList()],
