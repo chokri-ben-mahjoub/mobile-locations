@@ -819,6 +819,762 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les codes ne correspondent pas, recommencez.'**
   String get passcodeMismatch;
+
+  /// No description provided for @genericError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur : {error}'**
+  String genericError(String error);
+
+  /// No description provided for @confirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get confirm;
+
+  /// No description provided for @delete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get delete;
+
+  /// No description provided for @later.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get later;
+
+  /// No description provided for @addNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter maintenant'**
+  String get addNow;
+
+  /// No description provided for @restore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rétablir'**
+  String get restore;
+
+  /// No description provided for @collapse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduire'**
+  String get collapse;
+
+  /// No description provided for @collect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaisser'**
+  String get collect;
+
+  /// No description provided for @irreversibleAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette action est irréversible.'**
+  String get irreversibleAction;
+
+  /// No description provided for @otherCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get otherCategory;
+
+  /// No description provided for @addButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get addButton;
+
+  /// No description provided for @notesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes'**
+  String get notesTitle;
+
+  /// No description provided for @newContractButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrat'**
+  String get newContractButton;
+
+  /// No description provided for @insightUnpaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impayés'**
+  String get insightUnpaid;
+
+  /// No description provided for @insightToRenew.
+  ///
+  /// In fr, this message translates to:
+  /// **'À renouveler'**
+  String get insightToRenew;
+
+  /// No description provided for @insightOccupancy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Occupation'**
+  String get insightOccupancy;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un locataire ou un local…'**
+  String get searchHint;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get filterAll;
+
+  /// No description provided for @statusDueSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expire bientôt'**
+  String get statusDueSoon;
+
+  /// No description provided for @sortTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trier'**
+  String get sortTooltip;
+
+  /// No description provided for @sortExpiryDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d\'expiration'**
+  String get sortExpiryDate;
+
+  /// No description provided for @sortRentDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer (décroissant)'**
+  String get sortRentDesc;
+
+  /// No description provided for @sortRentAsc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer (croissant)'**
+  String get sortRentAsc;
+
+  /// No description provided for @sortNameAsc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom (A→Z)'**
+  String get sortNameAsc;
+
+  /// No description provided for @contractsEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contrat'**
+  String get contractsEmptyTitle;
+
+  /// No description provided for @contractsNoResultTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat'**
+  String get contractsNoResultTitle;
+
+  /// No description provided for @contractsEmptySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez votre premier contrat avec le bouton +.'**
+  String get contractsEmptySubtitle;
+
+  /// No description provided for @contractsNoResultSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contrat ni local en attente ne correspond à « {query} ».'**
+  String contractsNoResultSubtitle(String query);
+
+  /// No description provided for @contractsNoMatchCriteria.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun contrat ne correspond à ces critères.'**
+  String get contractsNoMatchCriteria;
+
+  /// No description provided for @heroTotalMonthlyRent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer mensuel total'**
+  String get heroTotalMonthlyRent;
+
+  /// No description provided for @heroCollectedThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé ce mois'**
+  String get heroCollectedThisMonth;
+
+  /// No description provided for @heroExpectedOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur {amount} attendus'**
+  String heroExpectedOf(String amount);
+
+  /// No description provided for @heroActiveContractsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{1 contrat actif} other{{count} contrats actifs}}'**
+  String heroActiveContractsCount(int count);
+
+  /// No description provided for @heroToRenewCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} à renouveler'**
+  String heroToRenewCount(int count);
+
+  /// No description provided for @collectThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaisser le mois'**
+  String get collectThisMonth;
+
+  /// No description provided for @unpaidSheetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyers à encaisser'**
+  String get unpaidSheetTitle;
+
+  /// No description provided for @shareReportTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager le rapport'**
+  String get shareReportTooltip;
+
+  /// No description provided for @allRentsCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les loyers sont encaissés'**
+  String get allRentsCollected;
+
+  /// No description provided for @vacantUnitsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Locaux en attente ({count})'**
+  String vacantUnitsCount(int count);
+
+  /// No description provided for @lastTenantLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier locataire : {name}'**
+  String lastTenantLabel(String name);
+
+  /// No description provided for @reactivateTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réactiver ce contrat'**
+  String get reactivateTooltip;
+
+  /// No description provided for @newTenantButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau locataire'**
+  String get newTenantButton;
+
+  /// No description provided for @reactivateConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réactiver ce contrat ?'**
+  String get reactivateConfirmTitle;
+
+  /// No description provided for @reactivateConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le local {unit} redeviendra actif avec {name} comme locataire, comme avant sa mise en attente.'**
+  String reactivateConfirmBody(String unit, String name);
+
+  /// No description provided for @reactivateConfirmBodyShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le local {unit} redeviendra actif avec {name} comme locataire.'**
+  String reactivateConfirmBodyShort(String unit, String name);
+
+  /// No description provided for @reactivateButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réactiver'**
+  String get reactivateButton;
+
+  /// No description provided for @exportContractsTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter les contrats'**
+  String get exportContractsTooltip;
+
+  /// No description provided for @shareMonthReportTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager le rapport du mois'**
+  String get shareMonthReportTooltip;
+
+  /// No description provided for @collectedInYear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé en {year}'**
+  String collectedInYear(int year);
+
+  /// No description provided for @collectionRate12m.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux d\'encaissement sur 12 mois : {rate} %'**
+  String collectionRate12m(int rate);
+
+  /// No description provided for @last12Months.
+  ///
+  /// In fr, this message translates to:
+  /// **'12 derniers mois'**
+  String get last12Months;
+
+  /// No description provided for @legendCollected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encaissé'**
+  String get legendCollected;
+
+  /// No description provided for @legendExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendu'**
+  String get legendExpected;
+
+  /// No description provided for @collectedOfExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{collected} sur {expected}'**
+  String collectedOfExpected(String collected, String expected);
+
+  /// No description provided for @thisMonthTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mois-ci'**
+  String get thisMonthTitle;
+
+  /// No description provided for @unpaidCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{1 impayé} other{{count} impayés}}'**
+  String unpaidCount(int count);
+
+  /// No description provided for @occupiedUnitsDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'{occupied}/{total} locaux occupés'**
+  String occupiedUnitsDetail(int occupied, int total);
+
+  /// No description provided for @upcomingDueDatesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéances à venir'**
+  String get upcomingDueDatesTitle;
+
+  /// No description provided for @upcomingDueDatesSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrats arrivant à terme dans les 6 prochains mois'**
+  String get upcomingDueDatesSubtitle;
+
+  /// No description provided for @noUpcomingDueDates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune échéance dans les 6 prochains mois.'**
+  String get noUpcomingDueDates;
+
+  /// No description provided for @daysRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'J-{days}'**
+  String daysRemaining(int days);
+
+  /// No description provided for @contractExpiredLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrat arrivé à échéance'**
+  String get contractExpiredLabel;
+
+  /// No description provided for @remainingMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'Encore {count} mois'**
+  String remainingMonths(int count);
+
+  /// No description provided for @remainingDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{Encore 1 jour} other{Encore {count} jours}}'**
+  String remainingDays(int count);
+
+  /// No description provided for @contractNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrat introuvable.'**
+  String get contractNotFound;
+
+  /// No description provided for @vacantUnitNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Local en attente — ancien locataire sorti.'**
+  String get vacantUnitNotice;
+
+  /// No description provided for @unitHistoryTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique de ce local'**
+  String get unitHistoryTooltip;
+
+  /// No description provided for @contractStartLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début du contrat'**
+  String get contractStartLabel;
+
+  /// No description provided for @contractEndLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin du contrat'**
+  String get contractEndLabel;
+
+  /// No description provided for @markVacantButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Locataire sorti — mettre le local en attente'**
+  String get markVacantButton;
+
+  /// No description provided for @markVacantConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer ce local en attente ?'**
+  String get markVacantConfirmTitle;
+
+  /// No description provided for @markVacantConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le contrat sera clôturé et le local n\'apparaîtra plus parmi les contrats actifs jusqu\'à l\'arrivée d\'un nouveau locataire.'**
+  String get markVacantConfirmBody;
+
+  /// No description provided for @newTenantQuestionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau locataire ?'**
+  String get newTenantQuestionTitle;
+
+  /// No description provided for @newTenantQuestionBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le local {unit} est maintenant en attente. Voulez-vous ajouter son nouveau locataire tout de suite ?'**
+  String newTenantQuestionBody(String unit);
+
+  /// No description provided for @deleteContractConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce contrat ?'**
+  String get deleteContractConfirmTitle;
+
+  /// No description provided for @paymentsHistoryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des paiements'**
+  String get paymentsHistoryTitle;
+
+  /// No description provided for @paidCountOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{paid}/{total} payés'**
+  String paidCountOf(int paid, int total);
+
+  /// No description provided for @paymentsHistoryHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Touchez un mois pour basculer payé/impayé. Appui long pour corriger le montant.'**
+  String get paymentsHistoryHint;
+
+  /// No description provided for @showAllMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher tous les mois ({count})'**
+  String showAllMonths(int count);
+
+  /// No description provided for @paymentCancelledSnack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement de {label} annulé'**
+  String paymentCancelledSnack(String label);
+
+  /// No description provided for @collectedSnack.
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} encaissé'**
+  String collectedSnack(String label);
+
+  /// No description provided for @amountPaidLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant payé'**
+  String get amountPaidLabel;
+
+  /// No description provided for @paymentDateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de paiement'**
+  String get paymentDateLabel;
+
+  /// No description provided for @markPaidButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer payé'**
+  String get markPaidButton;
+
+  /// No description provided for @shareReceiptButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager la quittance'**
+  String get shareReceiptButton;
+
+  /// No description provided for @cancelPaymentButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler ce paiement'**
+  String get cancelPaymentButton;
+
+  /// No description provided for @utilityBillsSectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Factures STEG / SONEDE'**
+  String get utilityBillsSectionTitle;
+
+  /// No description provided for @settledCountOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{paid}/{total} réglées'**
+  String settledCountOf(int paid, int total);
+
+  /// No description provided for @attachmentsSectionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pièces jointes'**
+  String get attachmentsSectionTitle;
+
+  /// No description provided for @noAttachmentsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune pièce jointe. Ajoutez une photo du contrat, de la CIN\nou de l\'état des lieux.'**
+  String get noAttachmentsHint;
+
+  /// No description provided for @documentTypeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type de document'**
+  String get documentTypeTitle;
+
+  /// No description provided for @takePhotoOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get takePhotoOption;
+
+  /// No description provided for @pickFromGalleryOption.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir depuis la galerie'**
+  String get pickFromGalleryOption;
+
+  /// No description provided for @deleteAttachmentConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer cette pièce jointe ?'**
+  String get deleteAttachmentConfirmTitle;
+
+  /// No description provided for @unitHistoryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique — {unit}'**
+  String unitHistoryTitle(String unit);
+
+  /// No description provided for @noUnitHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun historique pour ce local.'**
+  String get noUnitHistory;
+
+  /// No description provided for @unitHistoryStatusOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancien'**
+  String get unitHistoryStatusOld;
+
+  /// No description provided for @unitHistoryStatusCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actuel'**
+  String get unitHistoryStatusCurrent;
+
+  /// No description provided for @tenantsEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun locataire'**
+  String get tenantsEmptyTitle;
+
+  /// No description provided for @tenantsEmptySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les contrats que vous créez apparaîtront ici.'**
+  String get tenantsEmptySubtitle;
+
+  /// No description provided for @tenantsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{1 actif} other{{count} actifs}}'**
+  String tenantsCount(int count);
+
+  /// No description provided for @tenantsCountWithVacant.
+  ///
+  /// In fr, this message translates to:
+  /// **'{active, plural, one{1 actif} other{{active} actifs}} · {vacant, plural, one{1 local en attente} other{{vacant} locaux en attente}}'**
+  String tenantsCountWithVacant(int active, int vacant);
+
+  /// No description provided for @tenantsVacantUnitsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Locaux en attente'**
+  String get tenantsVacantUnitsTitle;
+
+  /// No description provided for @tenantsPeriodLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get tenantsPeriodLabel;
+
+  /// No description provided for @tenantsRentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer ({currency})'**
+  String tenantsRentLabel(String currency);
+
+  /// No description provided for @paidOnDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé le {date}'**
+  String paidOnDate(String date);
+
+  /// No description provided for @contractFormEditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le contrat'**
+  String get contractFormEditTitle;
+
+  /// No description provided for @contractFormNewTenantForUnit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau locataire — {unit}'**
+  String contractFormNewTenantForUnit(String unit);
+
+  /// No description provided for @contractFormNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau contrat'**
+  String get contractFormNewTitle;
+
+  /// No description provided for @contractFormSectionTenantUnit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Locataire & local'**
+  String get contractFormSectionTenantUnit;
+
+  /// No description provided for @contractFormTenantNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du locataire'**
+  String get contractFormTenantNameLabel;
+
+  /// No description provided for @contractFormUnitNumberLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de local (ex: A1-1)'**
+  String get contractFormUnitNumberLabel;
+
+  /// No description provided for @contractFormSectionDuration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée du contrat'**
+  String get contractFormSectionDuration;
+
+  /// No description provided for @contractFormStartDateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de début'**
+  String get contractFormStartDateLabel;
+
+  /// No description provided for @contractFormEndDateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de fin'**
+  String get contractFormEndDateLabel;
+
+  /// No description provided for @contractFormQuickDuration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée rapide'**
+  String get contractFormQuickDuration;
+
+  /// No description provided for @contractFormSectionRentMeters.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer & compteurs'**
+  String get contractFormSectionRentMeters;
+
+  /// No description provided for @contractFormInvalidAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant invalide'**
+  String get contractFormInvalidAmount;
+
+  /// No description provided for @contractFormStegLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compteur STEG (optionnel)'**
+  String get contractFormStegLabel;
+
+  /// No description provided for @contractFormSonedeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compteur SONEDE (optionnel)'**
+  String get contractFormSonedeLabel;
+
+  /// No description provided for @contractFormSectionNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes'**
+  String get contractFormSectionNotes;
+
+  /// No description provided for @contractFormNotesLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes (optionnel)'**
+  String get contractFormNotesLabel;
+
+  /// No description provided for @contractFormSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get contractFormSave;
+
+  /// No description provided for @contractFormAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter le contrat'**
+  String get contractFormAdd;
+
+  /// No description provided for @meterAutofillHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le compteur reste le même pour ce local, même en cas de changement de locataire.'**
+  String get meterAutofillHint;
+
+  /// No description provided for @pdfGeneratedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Généré le'**
+  String get pdfGeneratedOn;
 }
 
 class _AppLocalizationsDelegate

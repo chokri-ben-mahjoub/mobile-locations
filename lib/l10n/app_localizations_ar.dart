@@ -414,4 +414,498 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passcodeMismatch => 'الرمزان غير متطابقين، أعد المحاولة.';
+
+  @override
+  String genericError(String error) {
+    return 'خطأ: $error';
+  }
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get later => 'لاحقًا';
+
+  @override
+  String get addNow => 'أضف الآن';
+
+  @override
+  String get restore => 'استرجاع';
+
+  @override
+  String get collapse => 'طي';
+
+  @override
+  String get collect => 'تحصيل';
+
+  @override
+  String get irreversibleAction => 'هذا الإجراء لا يمكن التراجع عنه.';
+
+  @override
+  String get otherCategory => 'أخرى';
+
+  @override
+  String get addButton => 'إضافة';
+
+  @override
+  String get notesTitle => 'ملاحظات';
+
+  @override
+  String get newContractButton => 'عقد';
+
+  @override
+  String get insightUnpaid => 'غير مدفوع';
+
+  @override
+  String get insightToRenew => 'للتجديد';
+
+  @override
+  String get insightOccupancy => 'نسبة الإشغال';
+
+  @override
+  String get searchHint => 'ابحث عن مستأجر أو محل…';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get statusDueSoon => 'ينتهي قريبًا';
+
+  @override
+  String get sortTooltip => 'ترتيب';
+
+  @override
+  String get sortExpiryDate => 'تاريخ الانتهاء';
+
+  @override
+  String get sortRentDesc => 'الإيجار (تنازلي)';
+
+  @override
+  String get sortRentAsc => 'الإيجار (تصاعدي)';
+
+  @override
+  String get sortNameAsc => 'الاسم (أ→ي)';
+
+  @override
+  String get contractsEmptyTitle => 'لا توجد عقود';
+
+  @override
+  String get contractsNoResultTitle => 'لا توجد نتائج';
+
+  @override
+  String get contractsEmptySubtitle => 'أضف عقدك الأول باستخدام زر +.';
+
+  @override
+  String contractsNoResultSubtitle(String query) {
+    return 'لا يوجد عقد أو محل في الانتظار يطابق « $query ».';
+  }
+
+  @override
+  String get contractsNoMatchCriteria => 'لا يوجد عقد يطابق هذه المعايير.';
+
+  @override
+  String get heroTotalMonthlyRent => 'إجمالي الإيجار الشهري';
+
+  @override
+  String get heroCollectedThisMonth => 'تم تحصيله هذا الشهر';
+
+  @override
+  String heroExpectedOf(String amount) {
+    return 'من أصل $amount متوقع';
+  }
+
+  @override
+  String heroActiveContractsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عقد نشط',
+      many: '$count عقدًا نشطًا',
+      few: '$count عقود نشطة',
+      two: 'عقدان نشطان',
+      one: 'عقد نشط واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String heroToRenewCount(int count) {
+    return '$count للتجديد';
+  }
+
+  @override
+  String get collectThisMonth => 'تحصيل الشهر';
+
+  @override
+  String get unpaidSheetTitle => 'إيجارات للتحصيل';
+
+  @override
+  String get shareReportTooltip => 'مشاركة التقرير';
+
+  @override
+  String get allRentsCollected => 'تم تحصيل جميع الإيجارات';
+
+  @override
+  String vacantUnitsCount(int count) {
+    return 'محلات في الانتظار ($count)';
+  }
+
+  @override
+  String lastTenantLabel(String name) {
+    return 'آخر مستأجر: $name';
+  }
+
+  @override
+  String get reactivateTooltip => 'إعادة تفعيل هذا العقد';
+
+  @override
+  String get newTenantButton => 'مستأجر جديد';
+
+  @override
+  String get reactivateConfirmTitle => 'إعادة تفعيل هذا العقد؟';
+
+  @override
+  String reactivateConfirmBody(String unit, String name) {
+    return 'سيصبح المحل $unit نشطًا من جديد مع $name كمستأجر، كما كان قبل وضعه في الانتظار.';
+  }
+
+  @override
+  String reactivateConfirmBodyShort(String unit, String name) {
+    return 'سيصبح المحل $unit نشطًا من جديد مع $name كمستأجر.';
+  }
+
+  @override
+  String get reactivateButton => 'إعادة تفعيل';
+
+  @override
+  String get exportContractsTooltip => 'تصدير العقود';
+
+  @override
+  String get shareMonthReportTooltip => 'مشاركة تقرير الشهر';
+
+  @override
+  String collectedInYear(int year) {
+    return 'تم التحصيل في $year';
+  }
+
+  @override
+  String collectionRate12m(int rate) {
+    return 'معدل التحصيل خلال 12 شهرًا: $rate %';
+  }
+
+  @override
+  String get last12Months => 'آخر 12 شهرًا';
+
+  @override
+  String get legendCollected => 'تم التحصيل';
+
+  @override
+  String get legendExpected => 'متوقع';
+
+  @override
+  String collectedOfExpected(String collected, String expected) {
+    return '$collected من أصل $expected';
+  }
+
+  @override
+  String get thisMonthTitle => 'هذا الشهر';
+
+  @override
+  String unpaidCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count غير مدفوع',
+      many: '$count غير مدفوع',
+      few: '$count غير مدفوعة',
+      two: 'غير مدفوعين',
+      one: 'غير مدفوع واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String occupiedUnitsDetail(int occupied, int total) {
+    return '$occupied/$total محلات مشغولة';
+  }
+
+  @override
+  String get upcomingDueDatesTitle => 'مواعيد قادمة';
+
+  @override
+  String get upcomingDueDatesSubtitle => 'عقود تنتهي خلال الأشهر الستة القادمة';
+
+  @override
+  String get noUpcomingDueDates => 'لا توجد مواعيد خلال الأشهر الستة القادمة.';
+
+  @override
+  String daysRemaining(int days) {
+    return 'متبقي $days';
+  }
+
+  @override
+  String get contractExpiredLabel => 'انتهى العقد';
+
+  @override
+  String remainingMonths(int count) {
+    return 'متبقي $count أشهر';
+  }
+
+  @override
+  String remainingDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'متبقي $count يوم',
+      many: 'متبقي $count يومًا',
+      few: 'متبقي $count أيام',
+      two: 'متبقي يومان',
+      one: 'متبقي يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get contractNotFound => 'العقد غير موجود.';
+
+  @override
+  String get vacantUnitNotice => 'محل في الانتظار — غادر المستأجر السابق.';
+
+  @override
+  String get unitHistoryTooltip => 'سجل هذا المحل';
+
+  @override
+  String get contractStartLabel => 'بداية العقد';
+
+  @override
+  String get contractEndLabel => 'نهاية العقد';
+
+  @override
+  String get markVacantButton => 'غادر المستأجر — ضع المحل في الانتظار';
+
+  @override
+  String get markVacantConfirmTitle => 'وضع هذا المحل في الانتظار؟';
+
+  @override
+  String get markVacantConfirmBody =>
+      'سيتم إغلاق العقد ولن يظهر المحل ضمن العقود النشطة حتى وصول مستأجر جديد.';
+
+  @override
+  String get newTenantQuestionTitle => 'مستأجر جديد؟';
+
+  @override
+  String newTenantQuestionBody(String unit) {
+    return 'المحل $unit أصبح الآن في الانتظار. هل تريد إضافة مستأجره الجديد الآن؟';
+  }
+
+  @override
+  String get deleteContractConfirmTitle => 'حذف هذا العقد؟';
+
+  @override
+  String get paymentsHistoryTitle => 'سجل الدفعات';
+
+  @override
+  String paidCountOf(int paid, int total) {
+    return '$paid/$total مدفوعة';
+  }
+
+  @override
+  String get paymentsHistoryHint =>
+      'المس شهرًا لتبديل حالته بين مدفوع وغير مدفوع. اضغط مطولًا لتعديل المبلغ.';
+
+  @override
+  String showAllMonths(int count) {
+    return 'عرض جميع الأشهر ($count)';
+  }
+
+  @override
+  String paymentCancelledSnack(String label) {
+    return 'تم إلغاء دفعة $label';
+  }
+
+  @override
+  String collectedSnack(String label) {
+    return 'تم تحصيل $label';
+  }
+
+  @override
+  String get amountPaidLabel => 'المبلغ المدفوع';
+
+  @override
+  String get paymentDateLabel => 'تاريخ الدفع';
+
+  @override
+  String get markPaidButton => 'تحديد كمدفوع';
+
+  @override
+  String get shareReceiptButton => 'مشاركة الإيصال';
+
+  @override
+  String get cancelPaymentButton => 'إلغاء هذه الدفعة';
+
+  @override
+  String get utilityBillsSectionTitle => 'فواتير الستاغ / الصوناد';
+
+  @override
+  String settledCountOf(int paid, int total) {
+    return '$paid/$total مسددة';
+  }
+
+  @override
+  String get attachmentsSectionTitle => 'المرفقات';
+
+  @override
+  String get noAttachmentsHint =>
+      'لا توجد مرفقات بعد. أضف صورة للعقد أو بطاقة التعريف\nأو محضر المعاينة.';
+
+  @override
+  String get documentTypeTitle => 'نوع المستند';
+
+  @override
+  String get takePhotoOption => 'التقاط صورة';
+
+  @override
+  String get pickFromGalleryOption => 'اختيار من المعرض';
+
+  @override
+  String get deleteAttachmentConfirmTitle => 'حذف هذا المرفق؟';
+
+  @override
+  String unitHistoryTitle(String unit) {
+    return 'السجل — $unit';
+  }
+
+  @override
+  String get noUnitHistory => 'لا يوجد سجل لهذا المحل.';
+
+  @override
+  String get unitHistoryStatusOld => 'سابق';
+
+  @override
+  String get unitHistoryStatusCurrent => 'الحالي';
+
+  @override
+  String get tenantsEmptyTitle => 'لا يوجد مستأجرون';
+
+  @override
+  String get tenantsEmptySubtitle => 'ستظهر هنا العقود التي تنشئها.';
+
+  @override
+  String tenantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نشط',
+      many: '$count نشطًا',
+      few: '$count نشطة',
+      two: 'نشطان',
+      one: 'نشط واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tenantsCountWithVacant(int active, int vacant) {
+    String _temp0 = intl.Intl.pluralLogic(
+      active,
+      locale: localeName,
+      other: '$active نشط',
+      many: '$active نشطًا',
+      few: '$active نشطة',
+      two: 'نشطان',
+      one: 'نشط واحد',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      vacant,
+      locale: localeName,
+      other: '$vacant محل في الانتظار',
+      many: '$vacant محلًا في الانتظار',
+      few: '$vacant محلات في الانتظار',
+      two: 'محلان في الانتظار',
+      one: 'محل واحد في الانتظار',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get tenantsVacantUnitsTitle => 'محلات في الانتظار';
+
+  @override
+  String get tenantsPeriodLabel => 'الفترة';
+
+  @override
+  String tenantsRentLabel(String currency) {
+    return 'الإيجار ($currency)';
+  }
+
+  @override
+  String paidOnDate(String date) {
+    return 'دُفع في $date';
+  }
+
+  @override
+  String get contractFormEditTitle => 'تعديل العقد';
+
+  @override
+  String contractFormNewTenantForUnit(String unit) {
+    return 'مستأجر جديد — $unit';
+  }
+
+  @override
+  String get contractFormNewTitle => 'عقد جديد';
+
+  @override
+  String get contractFormSectionTenantUnit => 'المستأجر والمحل';
+
+  @override
+  String get contractFormTenantNameLabel => 'اسم المستأجر';
+
+  @override
+  String get contractFormUnitNumberLabel => 'رقم المحل (مثال: A1-1)';
+
+  @override
+  String get contractFormSectionDuration => 'مدة العقد';
+
+  @override
+  String get contractFormStartDateLabel => 'تاريخ البداية';
+
+  @override
+  String get contractFormEndDateLabel => 'تاريخ النهاية';
+
+  @override
+  String get contractFormQuickDuration => 'مدة سريعة';
+
+  @override
+  String get contractFormSectionRentMeters => 'الإيجار والعدادات';
+
+  @override
+  String get contractFormInvalidAmount => 'مبلغ غير صالح';
+
+  @override
+  String get contractFormStegLabel => 'عداد الستاغ (اختياري)';
+
+  @override
+  String get contractFormSonedeLabel => 'عداد الصوناد (اختياري)';
+
+  @override
+  String get contractFormSectionNotes => 'ملاحظات';
+
+  @override
+  String get contractFormNotesLabel => 'ملاحظات (اختياري)';
+
+  @override
+  String get contractFormSave => 'حفظ';
+
+  @override
+  String get contractFormAdd => 'إضافة العقد';
+
+  @override
+  String get meterAutofillHint =>
+      'يبقى العداد كما هو لنفس المحل حتى عند تغيير المستأجر.';
+
+  @override
+  String get pdfGeneratedOn => 'تم الإنشاء في';
 }

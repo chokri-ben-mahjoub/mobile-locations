@@ -96,7 +96,11 @@ class ContractsExportService {
           bytes,
         );
       case ExportFormat.pdf:
-        final bytes = await PdfTableExporter.encode(table, title: title);
+        final bytes = await PdfTableExporter.encode(
+          table,
+          title: title,
+          generatedOnLabel: l10n.pdfGeneratedOn,
+        );
         file = ShareableFile('${baseName}_$datePart.pdf', 'application/pdf', bytes);
       case ExportFormat.image:
         if (!context.mounted) {

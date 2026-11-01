@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
@@ -13,14 +14,15 @@ class UnitHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final currency = ref.watch(currencyProvider);
     final history = ref.watch(contractsForUnitProvider(unitNumber)).valueOrNull ?? [];
 
     return Scaffold(
-      appBar: AppBar(title: Text('Historique — $unitNumber')),
+      appBar: AppBar(title: Text(l10n.unitHistoryTitle(unitNumber))),
       body: history.isEmpty
-          ? const Center(child: Text('Aucun historique pour ce local.'))
+          ? Center(child: Text(l10n.noUnitHistory))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: history.length,
@@ -96,7 +98,9 @@ class UnitHistoryScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(
-                                c.archived ? 'Ancien' : (isCurrent ? 'Actuel' : 'Actif'),
+                                c.archived
+                                    ? l10n.unitHistoryStatusOld
+                                    : (isCurrent ? l10n.unitHistoryStatusCurrent : l10n.statusActive),
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,

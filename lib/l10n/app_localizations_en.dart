@@ -412,4 +412,482 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passcodeMismatch => 'Codes don\'t match, start over.';
+
+  @override
+  String genericError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get addNow => 'Add now';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get collapse => 'Collapse';
+
+  @override
+  String get collect => 'Collect';
+
+  @override
+  String get irreversibleAction => 'This action cannot be undone.';
+
+  @override
+  String get otherCategory => 'Other';
+
+  @override
+  String get addButton => 'Add';
+
+  @override
+  String get notesTitle => 'Notes';
+
+  @override
+  String get newContractButton => 'Contract';
+
+  @override
+  String get insightUnpaid => 'Unpaid';
+
+  @override
+  String get insightToRenew => 'To renew';
+
+  @override
+  String get insightOccupancy => 'Occupancy';
+
+  @override
+  String get searchHint => 'Search a tenant or a unit…';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get statusDueSoon => 'Expiring soon';
+
+  @override
+  String get sortTooltip => 'Sort';
+
+  @override
+  String get sortExpiryDate => 'Expiry date';
+
+  @override
+  String get sortRentDesc => 'Rent (highest first)';
+
+  @override
+  String get sortRentAsc => 'Rent (lowest first)';
+
+  @override
+  String get sortNameAsc => 'Name (A→Z)';
+
+  @override
+  String get contractsEmptyTitle => 'No contracts';
+
+  @override
+  String get contractsNoResultTitle => 'No results';
+
+  @override
+  String get contractsEmptySubtitle =>
+      'Add your first contract with the + button.';
+
+  @override
+  String contractsNoResultSubtitle(String query) {
+    return 'No contract or pending unit matches “$query”.';
+  }
+
+  @override
+  String get contractsNoMatchCriteria => 'No contract matches these criteria.';
+
+  @override
+  String get heroTotalMonthlyRent => 'Total monthly rent';
+
+  @override
+  String get heroCollectedThisMonth => 'Collected this month';
+
+  @override
+  String heroExpectedOf(String amount) {
+    return 'out of $amount expected';
+  }
+
+  @override
+  String heroActiveContractsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active contracts',
+      one: '1 active contract',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String heroToRenewCount(int count) {
+    return '$count to renew';
+  }
+
+  @override
+  String get collectThisMonth => 'Collect this month';
+
+  @override
+  String get unpaidSheetTitle => 'Rents to collect';
+
+  @override
+  String get shareReportTooltip => 'Share report';
+
+  @override
+  String get allRentsCollected => 'All rents are collected';
+
+  @override
+  String vacantUnitsCount(int count) {
+    return 'Pending units ($count)';
+  }
+
+  @override
+  String lastTenantLabel(String name) {
+    return 'Last tenant: $name';
+  }
+
+  @override
+  String get reactivateTooltip => 'Reactivate this contract';
+
+  @override
+  String get newTenantButton => 'New tenant';
+
+  @override
+  String get reactivateConfirmTitle => 'Reactivate this contract?';
+
+  @override
+  String reactivateConfirmBody(String unit, String name) {
+    return 'Unit $unit will become active again with $name as the tenant, as it was before it was marked pending.';
+  }
+
+  @override
+  String reactivateConfirmBodyShort(String unit, String name) {
+    return 'Unit $unit will become active again with $name as the tenant.';
+  }
+
+  @override
+  String get reactivateButton => 'Reactivate';
+
+  @override
+  String get exportContractsTooltip => 'Export contracts';
+
+  @override
+  String get shareMonthReportTooltip => 'Share this month\'s report';
+
+  @override
+  String collectedInYear(int year) {
+    return 'Collected in $year';
+  }
+
+  @override
+  String collectionRate12m(int rate) {
+    return '12-month collection rate: $rate %';
+  }
+
+  @override
+  String get last12Months => 'Last 12 months';
+
+  @override
+  String get legendCollected => 'Collected';
+
+  @override
+  String get legendExpected => 'Expected';
+
+  @override
+  String collectedOfExpected(String collected, String expected) {
+    return '$collected of $expected';
+  }
+
+  @override
+  String get thisMonthTitle => 'This month';
+
+  @override
+  String unpaidCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unpaid',
+      one: '1 unpaid',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String occupiedUnitsDetail(int occupied, int total) {
+    return '$occupied/$total units occupied';
+  }
+
+  @override
+  String get upcomingDueDatesTitle => 'Upcoming due dates';
+
+  @override
+  String get upcomingDueDatesSubtitle =>
+      'Contracts ending within the next 6 months';
+
+  @override
+  String get noUpcomingDueDates => 'No due dates in the next 6 months.';
+
+  @override
+  String daysRemaining(int days) {
+    return 'D-$days';
+  }
+
+  @override
+  String get contractExpiredLabel => 'Contract has ended';
+
+  @override
+  String remainingMonths(int count) {
+    return '$count months left';
+  }
+
+  @override
+  String remainingDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days left',
+      one: '1 day left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get contractNotFound => 'Contract not found.';
+
+  @override
+  String get vacantUnitNotice => 'Pending unit — previous tenant has left.';
+
+  @override
+  String get unitHistoryTooltip => 'History of this unit';
+
+  @override
+  String get contractStartLabel => 'Contract start';
+
+  @override
+  String get contractEndLabel => 'Contract end';
+
+  @override
+  String get markVacantButton => 'Tenant has left — mark unit as pending';
+
+  @override
+  String get markVacantConfirmTitle => 'Mark this unit as pending?';
+
+  @override
+  String get markVacantConfirmBody =>
+      'The contract will be closed and the unit will no longer appear among active contracts until a new tenant moves in.';
+
+  @override
+  String get newTenantQuestionTitle => 'New tenant?';
+
+  @override
+  String newTenantQuestionBody(String unit) {
+    return 'Unit $unit is now pending. Do you want to add its new tenant right away?';
+  }
+
+  @override
+  String get deleteContractConfirmTitle => 'Delete this contract?';
+
+  @override
+  String get paymentsHistoryTitle => 'Payment history';
+
+  @override
+  String paidCountOf(int paid, int total) {
+    return '$paid/$total paid';
+  }
+
+  @override
+  String get paymentsHistoryHint =>
+      'Tap a month to toggle paid/unpaid. Long-press to adjust the amount.';
+
+  @override
+  String showAllMonths(int count) {
+    return 'Show all months ($count)';
+  }
+
+  @override
+  String paymentCancelledSnack(String label) {
+    return '$label payment cancelled';
+  }
+
+  @override
+  String collectedSnack(String label) {
+    return '$label collected';
+  }
+
+  @override
+  String get amountPaidLabel => 'Amount paid';
+
+  @override
+  String get paymentDateLabel => 'Payment date';
+
+  @override
+  String get markPaidButton => 'Mark as paid';
+
+  @override
+  String get shareReceiptButton => 'Share receipt';
+
+  @override
+  String get cancelPaymentButton => 'Cancel this payment';
+
+  @override
+  String get utilityBillsSectionTitle => 'STEG / SONEDE bills';
+
+  @override
+  String settledCountOf(int paid, int total) {
+    return '$paid/$total settled';
+  }
+
+  @override
+  String get attachmentsSectionTitle => 'Attachments';
+
+  @override
+  String get noAttachmentsHint =>
+      'No attachments yet. Add a photo of the contract, ID\nor inspection report.';
+
+  @override
+  String get documentTypeTitle => 'Document type';
+
+  @override
+  String get takePhotoOption => 'Take a photo';
+
+  @override
+  String get pickFromGalleryOption => 'Choose from gallery';
+
+  @override
+  String get deleteAttachmentConfirmTitle => 'Delete this attachment?';
+
+  @override
+  String unitHistoryTitle(String unit) {
+    return 'History — $unit';
+  }
+
+  @override
+  String get noUnitHistory => 'No history for this unit.';
+
+  @override
+  String get unitHistoryStatusOld => 'Past';
+
+  @override
+  String get unitHistoryStatusCurrent => 'Current';
+
+  @override
+  String get tenantsEmptyTitle => 'No tenants';
+
+  @override
+  String get tenantsEmptySubtitle => 'Contracts you create will appear here.';
+
+  @override
+  String tenantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active',
+      one: '1 active',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tenantsCountWithVacant(int active, int vacant) {
+    String _temp0 = intl.Intl.pluralLogic(
+      active,
+      locale: localeName,
+      other: '$active active',
+      one: '1 active',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      vacant,
+      locale: localeName,
+      other: '$vacant pending units',
+      one: '1 pending unit',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get tenantsVacantUnitsTitle => 'Pending units';
+
+  @override
+  String get tenantsPeriodLabel => 'Period';
+
+  @override
+  String tenantsRentLabel(String currency) {
+    return 'Rent ($currency)';
+  }
+
+  @override
+  String paidOnDate(String date) {
+    return 'Paid on $date';
+  }
+
+  @override
+  String get contractFormEditTitle => 'Edit contract';
+
+  @override
+  String contractFormNewTenantForUnit(String unit) {
+    return 'New tenant — $unit';
+  }
+
+  @override
+  String get contractFormNewTitle => 'New contract';
+
+  @override
+  String get contractFormSectionTenantUnit => 'Tenant & unit';
+
+  @override
+  String get contractFormTenantNameLabel => 'Tenant name';
+
+  @override
+  String get contractFormUnitNumberLabel => 'Unit number (e.g. A1-1)';
+
+  @override
+  String get contractFormSectionDuration => 'Contract duration';
+
+  @override
+  String get contractFormStartDateLabel => 'Start date';
+
+  @override
+  String get contractFormEndDateLabel => 'End date';
+
+  @override
+  String get contractFormQuickDuration => 'Quick duration';
+
+  @override
+  String get contractFormSectionRentMeters => 'Rent & meters';
+
+  @override
+  String get contractFormInvalidAmount => 'Invalid amount';
+
+  @override
+  String get contractFormStegLabel => 'STEG meter (optional)';
+
+  @override
+  String get contractFormSonedeLabel => 'SONEDE meter (optional)';
+
+  @override
+  String get contractFormSectionNotes => 'Notes';
+
+  @override
+  String get contractFormNotesLabel => 'Notes (optional)';
+
+  @override
+  String get contractFormSave => 'Save';
+
+  @override
+  String get contractFormAdd => 'Add contract';
+
+  @override
+  String get meterAutofillHint =>
+      'The meter stays the same for this unit, even when the tenant changes.';
+
+  @override
+  String get pdfGeneratedOn => 'Generated on';
 }

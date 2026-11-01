@@ -26,6 +26,7 @@ class _LifetimeBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final total = contract.endDate.difference(contract.startDate).inHours;
     final elapsed = now.difference(contract.startDate).inHours;
@@ -33,10 +34,10 @@ class _LifetimeBar extends StatelessWidget {
     final daysLeft = contract.endDate.difference(now).inDays;
     final expired = !contract.endDate.isAfter(now);
     final label = expired
-        ? 'Contrat arrivé à échéance'
+        ? l10n.contractExpiredLabel
         : daysLeft > 60
-        ? 'Encore ${(daysLeft / 30).round()} mois'
-        : 'Encore $daysLeft jour${daysLeft > 1 ? 's' : ''}';
+        ? l10n.remainingMonths((daysLeft / 30).round())
+        : l10n.remainingDays(daysLeft);
 
     return Column(
       children: [
@@ -87,6 +88,7 @@ class ContractDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final contracts = ref.watch(contractsProvider).valueOrNull ?? [];
     final vacant = ref.watch(vacantContractsProvider).valueOrNull ?? [];
     final currency = ref.watch(currencyProvider);
@@ -98,7 +100,7 @@ class ContractDetailScreen extends ConsumerWidget {
     if (contract == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const Center(child: Text('Contrat introuvable.')),
+        body: Center(child: Text(l10n.contractNotFound)),
       );
     }
 
@@ -142,7 +144,7 @@ class ContractDetailScreen extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Local en attente — ancien locataire sorti.',
+                      l10n.vacantUnitNotice,
                       style: TextStyle(
                         color: scheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -151,7 +153,7 @@ class ContractDetailScreen extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () => _confirmReactivate(context, ref, c),
-                    child: const Text('Réactiver'),
+                    child: Text(l10n.reactivateButton),
                   ),
                 ],
               ),
@@ -210,7 +212,7 @@ class ContractDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Historique de ce local',
+                      tooltip: l10n.unitHistoryTooltip,
                       onPressed: () => context.push(
                         '/units/${Uri.encodeComponent(c.unitNumber)}/history',
                       ),
@@ -240,27 +242,27 @@ class ContractDetailScreen extends ConsumerWidget {
               children: [
                 _InfoTile(
                   icon: Icons.event_outlined,
-                  label: 'Début du contrat',
+                  label: l10n.contractStartLabel,
                   value: FormatUtils.shortDate.format(c.startDate),
                 ),
                 _InfoTile(
                   icon: Icons.event_busy_outlined,
-                  label: 'Fin du contrat',
+                  label: l10n.contractEndLabel,
                   value: FormatUtils.shortDate.format(c.endDate),
                 ),
                 _InfoTile(
                   icon: Icons.hourglass_bottom_rounded,
-                  label: 'Durée',
-                  value: FormatUtils.durationLabel(AppLocalizations.of(context), c.startDate, c.endDate),
+                  label: l10n.exportColDuration,
+                  value: FormatUtils.durationLabel(l10n, c.startDate, c.endDate),
                 ),
                 _InfoTile(
                   icon: Icons.bolt_outlined,
-                  label: 'Compteur STEG',
+                  label: l10n.exportColSteg,
                   value: c.stegMeter ?? '—',
                 ),
                 _InfoTile(
                   icon: Icons.water_drop_outlined,
-                  label: 'Compteur SONEDE',
+                  label: l10n.exportColSonede,
                   value: c.sonedeMeter ?? '—',
                   isLast: true,
                 ),
@@ -283,7 +285,7 @@ class ContractDetailScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Notes',
+                    l10n.notesTitle,
                     style: Theme.of(context).textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.w700),
                   ),
@@ -319,9 +321,9 @@ class ContractDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 icon: const Icon(Icons.logout_rounded),
-                label: const Text(
-                  'Locataire sorti — mettre le local en attente',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                label: Text(
+                  l10n.markVacantButton,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -336,22 +338,20 @@ class ContractDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Contract c,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Réactiver ce contrat ?'),
-        content: Text(
-          'Le local ${c.unitNumber} redeviendra actif avec '
-          '${c.tenantName} comme locataire.',
-        ),
+        title: Text(l10n.reactivateConfirmTitle),
+        content: Text(l10n.reactivateConfirmBodyShort(c.unitNumber, c.tenantName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Réactiver'),
+            child: Text(l10n.reactivateButton),
           ),
         ],
       ),
@@ -366,22 +366,20 @@ class ContractDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Contract c,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Marquer ce local en attente ?'),
-        content: const Text(
-          'Le contrat sera clôturé et le local n\'apparaîtra plus parmi les '
-          'contrats actifs jusqu\'à l\'arrivée d\'un nouveau locataire.',
-        ),
+        title: Text(l10n.markVacantConfirmTitle),
+        content: Text(l10n.markVacantConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Confirmer'),
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -394,19 +392,16 @@ class ContractDetailScreen extends ConsumerWidget {
     final addNow = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Nouveau locataire ?'),
-        content: Text(
-          'Le local ${c.unitNumber} est maintenant en attente. '
-          'Voulez-vous ajouter son nouveau locataire tout de suite ?',
-        ),
+        title: Text(l10n.newTenantQuestionTitle),
+        content: Text(l10n.newTenantQuestionBody(c.unitNumber)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Plus tard'),
+            child: Text(l10n.later),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ajouter maintenant'),
+            child: Text(l10n.addNow),
           ),
         ],
       ),
@@ -429,19 +424,20 @@ class ContractDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     String id,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer ce contrat ?'),
-        content: const Text('Cette action est irréversible.'),
+        title: Text(l10n.deleteContractConfirmTitle),
+        content: Text(l10n.irreversibleAction),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -484,6 +480,7 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final payments =
         ref
@@ -502,12 +499,12 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
         Row(
           children: [
             Text(
-              'Historique des paiements',
+              l10n.paymentsHistoryTitle,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const Spacer(),
             Text(
-              '$paidCount/${months.length} payés',
+              l10n.paidCountOf(paidCount, months.length),
               style: Theme.of(context).textTheme.bodySmall
                   ?.copyWith(color: scheme.onSurfaceVariant),
             ),
@@ -515,7 +512,7 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Touchez un mois pour basculer payé/impayé. Appui long pour corriger le montant.',
+          l10n.paymentsHistoryHint,
           style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
@@ -537,9 +534,7 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
           TextButton(
             onPressed: () => setState(() => _expanded = !_expanded),
             child: Text(
-              _expanded
-                  ? 'Réduire'
-                  : 'Afficher tous les mois (${months.length})',
+              _expanded ? l10n.collapse : l10n.showAllMonths(months.length),
             ),
           ),
       ],
@@ -549,6 +544,7 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
   /// Un seul tap : bascule rapidement payé (montant du loyer, aujourd'hui)
   /// ou impayé, sans passer par un formulaire.
   Future<void> _toggleMonth(DateTime month, Payment? existing) async {
+    final l10n = AppLocalizations.of(context);
     final controller = ref.read(paymentsControllerProvider);
     final messenger = ScaffoldMessenger.of(context);
     final label = FormatUtils.monthYear.format(month);
@@ -559,9 +555,9 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text('Paiement de $label annulé'),
+            content: Text(l10n.paymentCancelledSnack(label)),
             action: SnackBarAction(
-              label: 'Rétablir',
+              label: l10n.restore,
               onPressed: () => controller.markPaid(
                 contractId: existing.contractId,
                 month: month,
@@ -583,9 +579,9 @@ class _PaymentsSectionState extends ConsumerState<_PaymentsSection> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text('$label encaissé'),
+            content: Text(l10n.collectedSnack(label)),
             action: SnackBarAction(
-              label: 'Annuler',
+              label: l10n.cancel,
               onPressed: () => controller.markUnpaid(widget.contract.id, month),
             ),
           ),
@@ -740,6 +736,7 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final label = FormatUtils.monthYear.format(widget.month);
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -761,7 +758,7 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
           TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Montant payé'),
+            decoration: InputDecoration(labelText: l10n.amountPaidLabel),
           ),
           const SizedBox(height: 14),
           InkWell(
@@ -776,7 +773,7 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
               if (picked != null) setState(() => _paidDate = picked);
             },
             child: InputDecorator(
-              decoration: const InputDecoration(labelText: 'Date de paiement'),
+              decoration: InputDecoration(labelText: l10n.paymentDateLabel),
               child: Text(FormatUtils.shortDate.format(_paidDate)),
             ),
           ),
@@ -790,7 +787,7 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
                 if (amount == null) return;
                 Navigator.pop(context, _PaymentAction.paid(amount, _paidDate));
               },
-              child: const Text('Marquer payé'),
+              child: Text(l10n.markPaidButton),
             ),
           ),
           if (widget.existing != null) ...[
@@ -812,7 +809,7 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
                   );
                 },
                 icon: const Icon(Icons.receipt_long_rounded, size: 18),
-                label: const Text('Partager la quittance'),
+                label: Text(l10n.shareReceiptButton),
               ),
             ),
             const SizedBox(height: 8),
@@ -822,7 +819,7 @@ class _PaymentActionSheetState extends State<_PaymentActionSheet> {
               child: OutlinedButton(
                 onPressed: () =>
                     Navigator.pop(context, _PaymentAction.unpaid()),
-                child: const Text('Annuler ce paiement'),
+                child: Text(l10n.cancelPaymentButton),
               ),
             ),
           ],
@@ -905,6 +902,7 @@ class _UtilityBillsSectionState extends ConsumerState<_UtilityBillsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final c = widget.contract;
     final hasSteg = c.stegMeter != null;
@@ -923,10 +921,10 @@ class _UtilityBillsSectionState extends ConsumerState<_UtilityBillsSection> {
       children: [
         Row(
           children: [
-            Text('Factures STEG / SONEDE', style: Theme.of(context).textTheme.titleSmall),
+            Text(l10n.utilityBillsSectionTitle, style: Theme.of(context).textTheme.titleSmall),
             const Spacer(),
             Text(
-              '$paidCount/${months.length} réglées',
+              l10n.settledCountOf(paidCount, months.length),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -939,16 +937,16 @@ class _UtilityBillsSectionState extends ConsumerState<_UtilityBillsSection> {
             padding: const EdgeInsets.only(bottom: 12),
             child: SegmentedButton<String>(
               showSelectedIcon: false,
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: 'steg',
-                  label: Text('STEG'),
-                  icon: Icon(Icons.bolt_rounded, size: 16),
+                  label: const Text('STEG'),
+                  icon: const Icon(Icons.bolt_rounded, size: 16),
                 ),
                 ButtonSegment(
                   value: 'sonede',
-                  label: Text('SONEDE'),
-                  icon: Icon(Icons.water_drop_rounded, size: 16),
+                  label: const Text('SONEDE'),
+                  icon: const Icon(Icons.water_drop_rounded, size: 16),
                 ),
               ],
               selected: {_type},
@@ -970,7 +968,9 @@ class _UtilityBillsSectionState extends ConsumerState<_UtilityBillsSection> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  hasSteg ? 'Compteur STEG ${c.stegMeter}' : 'Compteur SONEDE ${c.sonedeMeter}',
+                  hasSteg
+                      ? '${l10n.exportColSteg} ${c.stegMeter}'
+                      : '${l10n.exportColSonede} ${c.sonedeMeter}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -994,7 +994,7 @@ class _UtilityBillsSectionState extends ConsumerState<_UtilityBillsSection> {
         if (months.length > 6)
           TextButton(
             onPressed: () => setState(() => _expanded = !_expanded),
-            child: Text(_expanded ? 'Réduire' : 'Afficher tous les mois (${months.length})'),
+            child: Text(_expanded ? l10n.collapse : l10n.showAllMonths(months.length)),
           ),
       ],
     );
@@ -1024,6 +1024,7 @@ class _AttachmentsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final attachments =
         ref.watch(attachmentsForContractProvider(contractId)).valueOrNull ?? [];
@@ -1034,7 +1035,7 @@ class _AttachmentsSection extends ConsumerWidget {
         Row(
           children: [
             Text(
-              'Pièces jointes',
+              l10n.attachmentsSectionTitle,
               style: Theme.of(context).textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
@@ -1042,7 +1043,7 @@ class _AttachmentsSection extends ConsumerWidget {
             TextButton.icon(
               onPressed: () => _showAddSheet(context, ref),
               icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-              label: const Text('Ajouter'),
+              label: Text(l10n.addButton),
             ),
           ],
         ),
@@ -1067,8 +1068,7 @@ class _AttachmentsSection extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aucune pièce jointe. Ajoutez une photo du contrat, de la CIN\n'
-                  'ou de l\'état des lieux.',
+                  l10n.noAttachmentsHint,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
@@ -1093,6 +1093,7 @@ class _AttachmentsSection extends ConsumerWidget {
   }
 
   Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final category = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -1103,7 +1104,7 @@ class _AttachmentsSection extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(
-                'Type de document',
+                l10n.documentTypeTitle,
                 style: Theme.of(context).textTheme.titleSmall
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),
@@ -1129,12 +1130,12 @@ class _AttachmentsSection extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Prendre une photo'),
+              title: Text(l10n.takePhotoOption),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_outlined),
-              title: const Text('Choisir depuis la galerie'),
+              title: Text(l10n.pickFromGalleryOption),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -1184,6 +1185,7 @@ class _AttachmentThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
@@ -1213,7 +1215,7 @@ class _AttachmentThumb extends StatelessWidget {
           SizedBox(
             width: 80,
             child: Text(
-              attachmentCategoryLabels[attachment.category] ?? 'Autre',
+              attachmentCategoryLabels[attachment.category] ?? l10n.otherCategory,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1234,6 +1236,7 @@ class _AttachmentViewer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return Dialog.fullscreen(
       backgroundColor: Colors.black,
       child: SafeArea(
@@ -1247,7 +1250,7 @@ class _AttachmentViewer extends ConsumerWidget {
                 ),
                 const Spacer(),
                 Text(
-                  attachmentCategoryLabels[attachment.category] ?? 'Autre',
+                  attachmentCategoryLabels[attachment.category] ?? l10n.otherCategory,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -1287,19 +1290,20 @@ class _AttachmentViewer extends ConsumerWidget {
     WidgetRef ref,
     Attachment attachment,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer cette pièce jointe ?'),
-        content: const Text('Cette action est irréversible.'),
+        title: Text(l10n.deleteAttachmentConfirmTitle),
+        content: Text(l10n.irreversibleAction),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

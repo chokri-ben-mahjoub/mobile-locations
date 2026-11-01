@@ -83,8 +83,12 @@ flutter:
           weight: 700
         - asset: assets/fonts/Inter-ExtraBold.ttf
           weight: 800
+    # Police arabe embarquée (export PDF + repli d'affichage à l'écran pour
+    # le texte arabe, qu'Inter ne couvre pas — licence SIL OFL, voir
+    # assets/fonts/LICENSE-NotoNaskhArabic.txt), 100 % hors ligne.
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Regular.ttf
 
-  # Police arabe embarquée (export PDF des noms de locataires, licence SIL
-  # OFL : assets/fonts/LICENSE-NotoNaskhArabic.txt), 100 % hors ligne.
   assets:
     - assets/fonts/NotoNaskhArabic-Regular.ttf

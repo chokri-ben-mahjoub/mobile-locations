@@ -76,6 +76,38 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
     _loadedExisting = true;
   }
 
+  /// Les compteurs STEG/SONEDE appartiennent au local, pas au locataire : si
+  /// on crée un NOUVEAU contrat pour un local qui a déjà eu un contrat avant
+  /// (même numéro de local), on reprend automatiquement ses relevés plutôt
+  /// que de les laisser vides ou risquer une ressaisie incohérente. On ne
+  /// touche jamais à ces deux champs si l'utilisateur y a déjà tapé quelque
+  /// chose lui-même.
+  void _tryAutofillMeters(String unitNumber) {
+    if (_isEditing) return;
+    if (_stegController.text.trim().isNotEmpty ||
+        _sonedeController.text.trim().isNotEmpty) {
+      return;
+    }
+    final target = unitNumber.trim().toLowerCase();
+    if (target.isEmpty) return;
+
+    final contracts = ref.read(contractsProvider).valueOrNull ?? [];
+    Contract? match;
+    for (final c in contracts) {
+      if (c.unitNumber.trim().toLowerCase() != target) continue;
+      if (match == null || c.startDate.isAfter(match.startDate)) match = c;
+    }
+    if (match == null) return;
+    final steg = match.stegMeter ?? '';
+    final sonede = match.sonedeMeter ?? '';
+    if (steg.isEmpty && sonede.isEmpty) return;
+
+    setState(() {
+      if (_stegController.text.trim().isEmpty) _stegController.text = steg;
+      if (_sonedeController.text.trim().isEmpty) _sonedeController.text = sonede;
+    });
+  }
+
   Future<void> _pickDate({required bool isStart}) async {
     final initial = isStart ? _startDate : _endDate;
     final picked = await showDatePicker(
@@ -157,6 +189,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
       }
     }
 
+    final l10n = AppLocalizations.of(context);
     final currency = ref.watch(currencyProvider);
     final scheme = Theme.of(context).colorScheme;
     final months = FormatUtils.monthsBetween(_startDate, _endDate);
@@ -165,10 +198,10 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
       appBar: AppBar(
         title: Text(
           _isEditing
-              ? 'Modifier le contrat'
+              ? l10n.contractFormEditTitle
               : widget.prefillUnitNumber != null
-              ? 'Nouveau locataire — ${widget.prefillUnitNumber}'
-              : 'Nouveau contrat',
+              ? l10n.contractFormNewTenantForUnit(widget.prefillUnitNumber!)
+              : l10n.contractFormNewTitle,
         ),
       ),
       body: Form(
@@ -205,29 +238,30 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               delay: 40,
               child: SectionCard(
                 icon: Icons.person_outline_rounded,
-                title: 'Locataire & local',
+                title: l10n.contractFormSectionTenantUnit,
                 children: [
                   TextFormField(
                     controller: _tenantNameController,
                     textCapitalization: TextCapitalization.words,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Nom du locataire',
-                      prefixIcon: Icon(Icons.badge_outlined),
+                    decoration: InputDecoration(
+                      labelText: l10n.contractFormTenantNameLabel,
+                      prefixIcon: const Icon(Icons.badge_outlined),
                     ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
+                        (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
                   ),
                   const SizedBox(height: 14),
                   TextFormField(
                     controller: _unitNumberController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Numéro de local (ex: A1-1)',
-                      prefixIcon: Icon(Icons.door_front_door_outlined),
+                    decoration: InputDecoration(
+                      labelText: l10n.contractFormUnitNumberLabel,
+                      prefixIcon: const Icon(Icons.door_front_door_outlined),
                     ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
+                        (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
+                    onChanged: _tryAutofillMeters,
                   ),
                 ],
               ),
@@ -237,13 +271,13 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               delay: 90,
               child: SectionCard(
                 icon: Icons.event_outlined,
-                title: 'Durée du contrat',
+                title: l10n.contractFormSectionDuration,
                 children: [
                   Row(
                     children: [
                       Expanded(
                         child: _DatePickerField(
-                          label: 'Date de début',
+                          label: l10n.contractFormStartDateLabel,
                           value: _startDate,
                           onTap: () => _pickDate(isStart: true),
                         ),
@@ -251,7 +285,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _DatePickerField(
-                          label: 'Date de fin',
+                          label: l10n.contractFormEndDateLabel,
                           value: _endDate,
                           onTap: () => _pickDate(isStart: false),
                         ),
@@ -260,7 +294,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Durée rapide',
+                    l10n.contractFormQuickDuration,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -272,11 +306,11 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      for (final (label, n) in const [
-                        ('6 mois', 6),
-                        ('1 an', 12),
-                        ('2 ans', 24),
-                        ('3 ans', 36),
+                      for (final (label, n) in [
+                        (l10n.durationMonths(6), 6),
+                        (l10n.durationYears(1), 12),
+                        (l10n.durationYears(2), 24),
+                        (l10n.durationYears(3), 36),
                       ])
                         _DurationChip(
                           label: label,
@@ -293,22 +327,23 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               delay: 140,
               child: SectionCard(
                 icon: Icons.payments_outlined,
-                title: 'Loyer & compteurs',
+                title: l10n.contractFormSectionRentMeters,
                 children: [
                   TextFormField(
                     controller: _amountController,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'Loyer mensuel ($currency)',
+                      labelText: l10n.exportColMonthlyRent(currency),
                       prefixIcon: const Icon(Icons.payments_outlined),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Champ requis';
-                      if (double.tryParse(v.trim()) == null)
-                        return 'Montant invalide';
+                      if (v == null || v.trim().isEmpty) return l10n.fieldRequired;
+                      if (double.tryParse(v.trim()) == null) {
+                        return l10n.contractFormInvalidAmount;
+                      }
                       return null;
                     },
                   ),
@@ -316,9 +351,9 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                   TextFormField(
                     controller: _stegController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Compteur STEG (optionnel)',
-                      prefixIcon: Icon(Icons.bolt_outlined),
+                    decoration: InputDecoration(
+                      labelText: l10n.contractFormStegLabel,
+                      prefixIcon: const Icon(Icons.bolt_outlined),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -326,11 +361,25 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                   TextFormField(
                     controller: _sonedeController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Compteur SONEDE (optionnel)',
-                      prefixIcon: Icon(Icons.water_drop_outlined),
+                    decoration: InputDecoration(
+                      labelText: l10n.contractFormSonedeLabel,
+                      prefixIcon: const Icon(Icons.water_drop_outlined),
                     ),
                     keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 14, color: scheme.onSurfaceVariant),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          l10n.meterAutofillHint,
+                          style: TextStyle(fontSize: 11.5, color: scheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -340,13 +389,13 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               delay: 190,
               child: SectionCard(
                 icon: Icons.notes_rounded,
-                title: 'Notes',
+                title: l10n.contractFormSectionNotes,
                 children: [
                   TextFormField(
                     controller: _notesController,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes (optionnel)',
+                    decoration: InputDecoration(
+                      labelText: l10n.contractFormNotesLabel,
                       alignLabelWithHint: true,
                     ),
                     maxLines: 3,
@@ -376,7 +425,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                     : Icon(
                         _isEditing ? Icons.check_rounded : Icons.add_rounded,
                       ),
-                label: Text(_isEditing ? 'Enregistrer' : 'Ajouter le contrat'),
+                label: Text(_isEditing ? l10n.contractFormSave : l10n.contractFormAdd),
               ),
             ),
           ],
@@ -445,7 +494,7 @@ class _Preview extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      tenant.isEmpty ? 'Nom du locataire' : tenant,
+                      tenant.isEmpty ? AppLocalizations.of(context).contractFormTenantNameLabel : tenant,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.titleMedium?.copyWith(

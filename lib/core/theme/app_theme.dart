@@ -39,9 +39,16 @@ class AppTheme {
             surfaceContainerHighest: const Color(0xFFDDE7E7),
           );
 
+    // `Inter` ne couvre pas les glyphes arabes : sans repli explicite, un nom
+    // de locataire ou un libellé en arabe s'affiche en carrés vides ("tofu"),
+    // surtout sur le web (CanvasKit n'a pas le même repli automatique vers
+    // une police système que les plateformes natives).
+    const fontFamilyFallback = ['NotoNaskhArabic'];
+
     final textTheme =
         (dark ? ThemeData.dark().textTheme : ThemeData.light().textTheme).apply(
           fontFamily: 'Inter',
+          fontFamilyFallback: fontFamilyFallback,
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         );
@@ -58,6 +65,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'Inter',
+      fontFamilyFallback: fontFamilyFallback,
       brightness: brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
@@ -71,7 +79,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(fontFamily: 'Inter', 
+        titleTextStyle: TextStyle(fontFamily: 'Inter', fontFamilyFallback: fontFamilyFallback,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
@@ -90,7 +98,7 @@ class AppTheme {
         side: BorderSide(
           color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
-        labelStyle: TextStyle(fontFamily: 'Inter', 
+        labelStyle: TextStyle(fontFamily: 'Inter', fontFamilyFallback: fontFamilyFallback,
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
@@ -136,7 +144,7 @@ class AppTheme {
         foregroundColor: colorScheme.onPrimary,
         elevation: 6,
         highlightElevation: 8,
-        extendedTextStyle: TextStyle(fontFamily: 'Inter', 
+        extendedTextStyle: TextStyle(fontFamily: 'Inter', fontFamilyFallback: fontFamilyFallback,
           fontWeight: FontWeight.w700,
           fontSize: 14,
         ),
@@ -146,7 +154,7 @@ class AppTheme {
         backgroundColor: colorScheme.surfaceContainerLow,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        titleTextStyle: TextStyle(fontFamily: 'Inter', 
+        titleTextStyle: TextStyle(fontFamily: 'Inter', fontFamilyFallback: fontFamilyFallback,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: colorScheme.onSurface,
@@ -166,7 +174,7 @@ class AppTheme {
         backgroundColor: dark
             ? const Color(0xFFE6EEEE)
             : const Color(0xFF14262A),
-        contentTextStyle: TextStyle(fontFamily: 'Inter', 
+        contentTextStyle: TextStyle(fontFamily: 'Inter', fontFamilyFallback: fontFamilyFallback,
           color: dark ? const Color(0xFF0B1214) : Colors.white,
           fontWeight: FontWeight.w600,
         ),

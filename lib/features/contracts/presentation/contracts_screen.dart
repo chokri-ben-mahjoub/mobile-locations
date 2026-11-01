@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/analytics/portfolio_stats.dart';
@@ -66,6 +67,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final contractsAsync = ref.watch(contractsProvider);
     final vacantUnits = ref.watch(vacantContractsProvider).valueOrNull ?? [];
     final reminderLeadMonths = ref.watch(reminderLeadMonthsProvider);
@@ -90,12 +92,12 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
             context.push('/contracts/new');
           },
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Contrat'),
+          label: Text(l10n.newContractButton),
         ),
       ),
       body: contractsAsync.when(
         loading: () => const ContractsSkeleton(),
-        error: (err, stack) => Center(child: Text('Erreur : $err')),
+        error: (err, stack) => Center(child: Text(l10n.genericError('$err'))),
         data: (contracts) {
           final total = contracts.length;
           final totalMonthly = contracts.fold<double>(
@@ -189,7 +191,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                             Expanded(
                               child: _InsightTile(
                                 icon: Icons.pending_actions_rounded,
-                                label: 'Impayés',
+                                label: l10n.insightUnpaid,
                                 value: unpaidCount,
                                 color: unpaidCount > 0 ? scheme.error : okColor,
                                 onTap: () => _showUnpaidSheet(context),
@@ -199,7 +201,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                             Expanded(
                               child: _InsightTile(
                                 icon: Icons.autorenew_rounded,
-                                label: 'À renouveler',
+                                label: l10n.insightToRenew,
                                 value: dueSoonCount,
                                 color: dueSoonCount > 0
                                     ? warnColor
@@ -212,7 +214,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                             Expanded(
                               child: _InsightTile(
                                 icon: Icons.donut_large_rounded,
-                                label: 'Occupation',
+                                label: l10n.insightOccupancy,
                                 value: ((stats?.occupancy ?? 0) * 100).round(),
                                 suffix: '%',
                                 color: scheme.primary,
@@ -227,7 +229,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                         controller: _searchController,
                         textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
-                          hintText: 'Rechercher un locataire ou un local…',
+                          hintText: l10n.searchHint,
                           prefixIcon: const Icon(Icons.search_rounded),
                           suffixIcon: _query.isEmpty
                               ? null
@@ -261,14 +263,14 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                               child: Row(
                                 children: [
                                   _FilterPill(
-                                    label: 'Tous',
+                                    label: l10n.filterAll,
                                     count: searched.length,
                                     selected: _statusFilter == null,
                                     onTap: () => _setFilter(null),
                                   ),
                                   const SizedBox(width: 8),
                                   _FilterPill(
-                                    label: 'Actifs',
+                                    label: l10n.statusActive,
                                     count: countFor(ContractUrgency.active),
                                     selected:
                                         _statusFilter == ContractUrgency.active,
@@ -277,7 +279,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   _FilterPill(
-                                    label: 'Expire bientôt',
+                                    label: l10n.statusDueSoon,
                                     count: countFor(ContractUrgency.dueSoon),
                                     selected:
                                         _statusFilter ==
@@ -287,7 +289,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   _FilterPill(
-                                    label: 'Expirés',
+                                    label: l10n.statusExpired,
                                     count: countFor(ContractUrgency.expired),
                                     selected:
                                         _statusFilter ==
@@ -301,29 +303,29 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                           ),
                           const SizedBox(width: 4),
                           PopupMenuButton<ContractSortOption>(
-                            tooltip: 'Trier',
+                            tooltip: l10n.sortTooltip,
                             initialValue: _sortBy,
                             onSelected: (v) => setState(() => _sortBy = v),
                             icon: Icon(
                               Icons.swap_vert_rounded,
                               color: scheme.onSurfaceVariant,
                             ),
-                            itemBuilder: (context) => const [
+                            itemBuilder: (context) => [
                               PopupMenuItem(
                                 value: ContractSortOption.expiryAsc,
-                                child: Text('Date d\'expiration'),
+                                child: Text(l10n.sortExpiryDate),
                               ),
                               PopupMenuItem(
                                 value: ContractSortOption.rentDesc,
-                                child: Text('Loyer (décroissant)'),
+                                child: Text(l10n.sortRentDesc),
                               ),
                               PopupMenuItem(
                                 value: ContractSortOption.rentAsc,
-                                child: Text('Loyer (croissant)'),
+                                child: Text(l10n.sortRentAsc),
                               ),
                               PopupMenuItem(
                                 value: ContractSortOption.nameAsc,
-                                child: Text('Nom (A→Z)'),
+                                child: Text(l10n.sortNameAsc),
                               ),
                             ],
                           ),
@@ -340,10 +342,10 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                     icon: q.isEmpty
                         ? Icons.inbox_outlined
                         : Icons.search_off_rounded,
-                    title: q.isEmpty ? 'Aucun contrat' : 'Aucun résultat',
+                    title: q.isEmpty ? l10n.contractsEmptyTitle : l10n.contractsNoResultTitle,
                     subtitle: q.isEmpty
-                        ? 'Ajoutez votre premier contrat avec le bouton +.'
-                        : 'Aucun contrat ni local en attente ne correspond à « $q ».',
+                        ? l10n.contractsEmptySubtitle
+                        : l10n.contractsNoResultSubtitle(q),
                   ),
                 )
               else if (filtered.isEmpty)
@@ -354,7 +356,7 @@ class _ContractsScreenState extends ConsumerState<ContractsScreen> {
                       vertical: 8,
                     ),
                     child: Text(
-                      'Aucun contrat ne correspond à ces critères.',
+                      l10n.contractsNoMatchCriteria,
                       style: Theme.of(context).textTheme.bodySmall
                           ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
@@ -457,6 +459,7 @@ class _Header extends StatelessWidget {
             children: [
               Text(
                 'LocaTrack',
+                // Nom de produit, non traduit.
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
@@ -516,6 +519,7 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final month = stats?.current;
     final collected = month?.collected ?? 0;
@@ -533,7 +537,7 @@ class _Hero extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Loyer mensuel total',
+                  l10n.heroTotalMonthlyRent,
                   style: text.bodyMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.82),
                   ),
@@ -580,7 +584,7 @@ class _Hero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Encaissé ce mois',
+                      l10n.heroCollectedThisMonth,
                       style: text.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.78),
                       ),
@@ -600,7 +604,7 @@ class _Hero extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'sur ${FormatUtils.currency(expected, currency)} attendus',
+                      l10n.heroExpectedOf(FormatUtils.currency(expected, currency)),
                       style: text.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.7),
                       ),
@@ -617,13 +621,12 @@ class _Hero extends StatelessWidget {
             children: [
               _GlassPill(
                 icon: Icons.description_rounded,
-                label:
-                    '$activeCount contrat${activeCount > 1 ? 's' : ''} actif${activeCount > 1 ? 's' : ''}',
+                label: l10n.heroActiveContractsCount(activeCount),
               ),
               if (dueSoonCount > 0)
                 _GlassPill(
                   icon: Icons.notifications_active_rounded,
-                  label: '$dueSoonCount à renouveler',
+                  label: l10n.heroToRenewCount(dueSoonCount),
                   tint: goldColor,
                 ),
             ],
@@ -813,14 +816,14 @@ class _ContractCard extends ConsumerWidget {
     required this.onTap,
   });
 
-  (Color, String) get _badge {
+  (Color, String) _badge(AppLocalizations l10n) {
     switch (urgency) {
       case ContractUrgency.expired:
-        return (Colors.grey, 'Expiré');
+        return (Colors.grey, l10n.statusExpired);
       case ContractUrgency.dueSoon:
-        return (warnColor, 'Expire bientôt');
+        return (warnColor, l10n.statusDueSoon);
       case ContractUrgency.active:
-        return (okColor, 'Actif');
+        return (okColor, l10n.statusActive);
     }
   }
 
@@ -832,8 +835,9 @@ class _ContractCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final (badgeColor, badgeLabel) = _badge;
+    final (badgeColor, badgeLabel) = _badge(l10n);
 
     final card = Pressable(
       onTap: onTap,
@@ -1036,14 +1040,14 @@ class _ContractCard extends ConsumerWidget {
             ),
             borderRadius: BorderRadius.circular(22),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.payments_rounded, color: Colors.white),
-              SizedBox(width: 10),
+              const Icon(Icons.payments_rounded, color: Colors.white),
+              const SizedBox(width: 10),
               Text(
-                'Encaisser le mois',
-                style: TextStyle(
+                l10n.collectThisMonth,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                 ),
@@ -1062,6 +1066,7 @@ class _UnpaidSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final stats = ref.watch(portfolioStatsProvider).valueOrNull;
     final currency = ref.watch(currencyProvider);
@@ -1088,7 +1093,7 @@ class _UnpaidSheet extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Loyers à encaisser',
+                          l10n.unpaidSheetTitle,
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w800,
@@ -1105,7 +1110,7 @@ class _UnpaidSheet extends ConsumerWidget {
                   ),
                   if (stats != null)
                     IconButton.filledTonal(
-                      tooltip: 'Partager le rapport',
+                      tooltip: l10n.shareReportTooltip,
                       icon: const Icon(Icons.ios_share_rounded, size: 20),
                       onPressed: () => Share.share(
                         buildMonthReportText(
@@ -1140,7 +1145,7 @@ class _UnpaidSheet extends ConsumerWidget {
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          'Tous les loyers sont encaissés',
+                          l10n.allRentsCollected,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -1217,7 +1222,7 @@ class _UnpaidSheet extends ConsumerWidget {
                             FilledButton.tonal(
                               onPressed: () =>
                                   quickPayCurrentMonth(context, ref, c),
-                              child: const Text('Encaisser'),
+                              child: Text(l10n.collect),
                             ),
                           ],
                         ),
@@ -1240,6 +1245,7 @@ class _VacantUnitsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
 
     return Column(
@@ -1254,7 +1260,7 @@ class _VacantUnitsSection extends ConsumerWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Locaux en attente (${units.length})',
+              l10n.vacantUnitsCount(units.length),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: scheme.onSurfaceVariant,
@@ -1311,12 +1317,12 @@ class _VacantUnitsSection extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'En attente',
+                                  l10n.statusPending,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 Text(
-                                  'Dernier locataire : ${unit.tenantName}',
+                                  l10n.lastTenantLabel(unit.tenantName),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.bodySmall
@@ -1328,7 +1334,7 @@ class _VacantUnitsSection extends ConsumerWidget {
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Réactiver ce contrat',
+                            tooltip: l10n.reactivateTooltip,
                             icon: Icon(
                               Icons.restart_alt_rounded,
                               color: scheme.onSurfaceVariant,
@@ -1352,9 +1358,9 @@ class _VacantUnitsSection extends ConsumerWidget {
                             Icons.person_add_alt_1_rounded,
                             size: 18,
                           ),
-                          label: const Text(
-                            'Nouveau locataire',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                          label: Text(
+                            l10n.newTenantButton,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -1373,22 +1379,20 @@ class _VacantUnitsSection extends ConsumerWidget {
     WidgetRef ref,
     Contract unit,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Réactiver ce contrat ?'),
-        content: Text(
-          'Le local ${unit.unitNumber} redeviendra actif avec '
-          '${unit.tenantName} comme locataire, comme avant sa mise en attente.',
-        ),
+        title: Text(l10n.reactivateConfirmTitle),
+        content: Text(l10n.reactivateConfirmBody(unit.unitNumber, unit.tenantName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Réactiver'),
+            child: Text(l10n.reactivateButton),
           ),
         ],
       ),

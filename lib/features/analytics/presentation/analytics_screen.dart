@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/analytics/portfolio_stats.dart';
@@ -37,6 +38,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(portfolioStatsProvider);
     final currency = ref.watch(currencyProvider);
     final scheme = Theme.of(context).colorScheme;
@@ -54,7 +56,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ShimmerBox(height: 260, radius: 26),
           ],
         ),
-        error: (e, _) => Center(child: Text('Erreur : $e')),
+        error: (e, _) => Center(child: Text(l10n.genericError('$e'))),
         data: (stats) {
           final now = DateTime.now();
           final sel = _selected ?? stats.months.length - 1;
@@ -87,7 +89,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Analyses',
+                      l10n.navAnalytics,
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             fontWeight: FontWeight.w800,
@@ -96,7 +98,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ),
                   ),
                   IconButton.filledTonal(
-                    tooltip: 'Exporter les contrats',
+                    tooltip: l10n.exportContractsTooltip,
                     icon: _exporting
                         ? const SizedBox(
                             width: 18,
@@ -108,7 +110,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filledTonal(
-                    tooltip: 'Partager le rapport du mois',
+                    tooltip: l10n.shareMonthReportTooltip,
                     icon: const Icon(Icons.ios_share_rounded, size: 20),
                     onPressed: () => Share.share(
                       buildMonthReportText(
@@ -128,7 +130,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Encaissé en ${now.year}',
+                      l10n.collectedInYear(now.year),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.82),
                       ),
@@ -157,7 +159,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Taux d\'encaissement sur 12 mois : ${(rate12 * 100).round()} %',
+                      l10n.collectionRate12m((rate12 * 100).round()),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w600,
@@ -175,16 +177,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            '12 derniers mois',
+                            l10n.last12Months,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
-                        _Legend(color: scheme.primary, label: 'Encaissé'),
+                        _Legend(color: scheme.primary, label: l10n.legendCollected),
                         const SizedBox(width: 12),
                         _Legend(
                           color: scheme.surfaceContainerHighest,
-                          label: 'Attendu',
+                          label: l10n.legendExpected,
                         ),
                       ],
                     ),
@@ -230,8 +232,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '${FormatUtils.currency(m.collected, currency)} '
-                                    'sur ${FormatUtils.currency(m.expected, currency)}',
+                                    l10n.collectedOfExpected(
+                                      FormatUtils.currency(m.collected, currency),
+                                      FormatUtils.currency(m.expected, currency),
+                                    ),
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: scheme.onSurfaceVariant,
@@ -266,24 +270,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   children: [
                     Expanded(
                       child: _RingPanel(
-                        title: 'Occupation',
+                        title: l10n.insightOccupancy,
                         progress: stats.occupancy,
                         color: scheme.primary,
-                        detail:
-                            '${stats.occupiedUnits}/${stats.totalUnits} locaux occupés',
+                        detail: l10n.occupiedUnitsDetail(stats.occupiedUnits, stats.totalUnits),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _RingPanel(
-                        title: 'Ce mois-ci',
+                        title: l10n.thisMonthTitle,
                         progress: stats.current.rate,
                         color: stats.current.rate >= 0.999
                             ? okColor
                             : goldColor,
                         detail: stats.unpaidThisMonth.isEmpty
-                            ? 'Tout est encaissé'
-                            : '${stats.unpaidThisMonth.length} impayé${stats.unpaidThisMonth.length > 1 ? 's' : ''}',
+                            ? l10n.allRentsCollected
+                            : l10n.unpaidCount(stats.unpaidThisMonth.length),
                       ),
                     ),
                   ],
@@ -291,13 +294,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
               const SizedBox(height: 22),
               Text(
-                'Échéances à venir',
+                l10n.upcomingDueDatesTitle,
                 style: Theme.of(context).textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 2),
               Text(
-                'Contrats arrivant à terme dans les 6 prochains mois',
+                l10n.upcomingDueDatesSubtitle,
                 style: Theme.of(context).textTheme.bodySmall
                     ?.copyWith(color: scheme.onSurfaceVariant),
               ),
@@ -310,7 +313,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Aucune échéance dans les 6 prochains mois.',
+                          l10n.noUpcomingDueDates,
                           style: TextStyle(color: scheme.onSurfaceVariant),
                         ),
                       ),
@@ -439,6 +442,7 @@ class _ExpiryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final days = contract.endDate.difference(now).inDays;
     final expired = !contract.endDate.isAfter(now);
@@ -447,7 +451,7 @@ class _ExpiryRow extends StatelessWidget {
         : days <= 30
         ? warnColor
         : scheme.primary;
-    final label = expired ? 'Expiré' : 'J-$days';
+    final label = expired ? l10n.statusExpired : l10n.daysRemaining(days);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),

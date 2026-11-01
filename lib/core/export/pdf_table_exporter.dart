@@ -44,6 +44,7 @@ class PdfTableExporter {
   static Future<Uint8List> encode(
     ExportTable table, {
     required String title,
+    String generatedOnLabel = 'Généré le',
   }) async {
     await _ensureFontsLoaded();
 
@@ -80,7 +81,7 @@ class PdfTableExporter {
         ),
         footer: (context) => pw.Row(
           children: [
-            pw.Text('Généré le $generated', style: pw.TextStyle(font: _latinFont, color: _grey, fontSize: 8)),
+            pw.Text('$generatedOnLabel $generated', style: pw.TextStyle(font: _latinFont, color: _grey, fontSize: 8)),
             pw.Spacer(),
             pw.Text(
               '${context.pageNumber} / ${context.pagesCount}',

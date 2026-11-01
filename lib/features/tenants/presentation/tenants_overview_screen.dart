@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/database/app_providers.dart';
+import '../../../core/export/export_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/arabic_text.dart';
 import '../../../core/utils/format_utils.dart';
@@ -14,11 +16,25 @@ import '../../../core/widgets/shimmer.dart';
 /// avec, pour chacun, le loyer, les compteurs STEG/SONEDE et la date du
 /// dernier règlement de chaque poste — pour avoir une vision complète sans
 /// ouvrir chaque contrat un par un.
-class TenantsOverviewScreen extends ConsumerWidget {
+class TenantsOverviewScreen extends ConsumerStatefulWidget {
   const TenantsOverviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TenantsOverviewScreen> createState() => _TenantsOverviewScreenState();
+}
+
+class _TenantsOverviewScreenState extends ConsumerState<TenantsOverviewScreen> {
+  bool _exporting = false;
+
+  Future<void> _export() async {
+    setState(() => _exporting = true);
+    await runContractsExport(context, ref);
+    if (mounted) setState(() => _exporting = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final activeAsync = ref.watch(contractsProvider);
     final vacantAsync = ref.watch(vacantContractsProvider);
     final paymentsAsync = ref.watch(allPaymentsProvider);
@@ -57,11 +73,11 @@ class TenantsOverviewScreen extends ConsumerWidget {
     if (active.isEmpty && vacant.isEmpty) {
       return ListView(
         padding: EdgeInsets.fromLTRB(16, pad.top + 16, 16, 16),
-        children: const [
+        children: [
           EmptyState(
             icon: Icons.people_outline_rounded,
-            title: 'Aucun locataire',
-            subtitle: 'Les contrats que vous créez apparaîtront ici.',
+            title: l10n.tenantsEmptyTitle,
+            subtitle: l10n.tenantsEmptySubtitle,
           ),
         ],
       );
@@ -71,17 +87,35 @@ class TenantsOverviewScreen extends ConsumerWidget {
       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       padding: EdgeInsets.fromLTRB(16, pad.top + 14, 16, 24 + pad.bottom),
       children: [
-        Text(
-          'Locataires',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.6,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.navTenants,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.6,
+                    ),
               ),
+            ),
+            IconButton.filledTonal(
+              tooltip: l10n.exportShareButton,
+              icon: _exporting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.file_download_outlined, size: 20),
+              onPressed: _exporting ? null : _export,
+            ),
+          ],
         ),
         const SizedBox(height: 4),
         Text(
-          '${active.length} actif${active.length > 1 ? 's' : ''}'
-          '${vacant.isNotEmpty ? ' · ${vacant.length} local${vacant.length > 1 ? 'aux' : ''} en attente' : ''}',
+          vacant.isNotEmpty
+              ? l10n.tenantsCountWithVacant(active.length, vacant.length)
+              : l10n.tenantsCount(active.length),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -99,7 +133,7 @@ class TenantsOverviewScreen extends ConsumerWidget {
         if (vacant.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
-            'Locaux en attente',
+            l10n.tenantsVacantUnitsTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
@@ -144,6 +178,7 @@ class _TenantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final now = DateTime.now();
     final expired = !vacant && !contract.endDate.isAfter(now);
@@ -158,10 +193,10 @@ class _TenantCard extends StatelessWidget {
     );
 
     final (statusLabel, statusColor) = vacant
-        ? ('En attente', scheme.onSurfaceVariant)
+        ? (l10n.statusPending, scheme.onSurfaceVariant)
         : expired
-            ? ('Expiré', scheme.error)
-            : ('Actif', okColor);
+            ? (l10n.statusExpired, scheme.error)
+            : (l10n.statusActive, okColor);
 
     return Pressable(
       onTap: () => context.push('/contracts/${contract.id}'),
@@ -230,26 +265,26 @@ class _TenantCard extends StatelessWidget {
               children: [
                 _InfoItem(
                   icon: Icons.calendar_today_rounded,
-                  label: 'Période',
+                  label: l10n.tenantsPeriodLabel,
                   value:
                       '${FormatUtils.shortDate.format(contract.startDate)} → ${FormatUtils.shortDate.format(contract.endDate)}',
                 ),
                 _InfoItem(
                   icon: Icons.payments_outlined,
-                  label: 'Loyer (${FormatUtils.currency(contract.monthlyAmount, currency)})',
-                  value: lastRent == null ? 'Non payé' : 'Payé le ${FormatUtils.shortDate.format(lastRent)}',
+                  label: l10n.tenantsRentLabel(FormatUtils.currency(contract.monthlyAmount, currency)),
+                  value: lastRent == null ? l10n.notPaid : l10n.paidOnDate(FormatUtils.shortDate.format(lastRent)),
                   valueColor: lastRent == null ? scheme.error : okColor,
                 ),
                 _InfoItem(
                   icon: Icons.bolt_rounded,
-                  label: contract.stegMeter == null ? 'STEG' : 'STEG · ${contract.stegMeter}',
-                  value: lastSteg == null ? 'Non payé' : 'Payé le ${FormatUtils.shortDate.format(lastSteg)}',
+                  label: contract.stegMeter == null ? l10n.exportColSteg : '${l10n.exportColSteg} · ${contract.stegMeter}',
+                  value: lastSteg == null ? l10n.notPaid : l10n.paidOnDate(FormatUtils.shortDate.format(lastSteg)),
                   valueColor: lastSteg == null ? scheme.onSurfaceVariant : okColor,
                 ),
                 _InfoItem(
                   icon: Icons.water_drop_outlined,
-                  label: contract.sonedeMeter == null ? 'SONEDE' : 'SONEDE · ${contract.sonedeMeter}',
-                  value: lastSonede == null ? 'Non payé' : 'Payé le ${FormatUtils.shortDate.format(lastSonede)}',
+                  label: contract.sonedeMeter == null ? l10n.exportColSonede : '${l10n.exportColSonede} · ${contract.sonedeMeter}',
+                  value: lastSonede == null ? l10n.notPaid : l10n.paidOnDate(FormatUtils.shortDate.format(lastSonede)),
                   valueColor: lastSonede == null ? scheme.onSurfaceVariant : okColor,
                 ),
               ],
