@@ -7,6 +7,7 @@ import 'package:locations_app/l10n/app_localizations.dart';
 import '../../../core/auth/auth_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glow_background.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/reveal.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -27,11 +28,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Scaffold(
       body: GlowBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 const Spacer(),
                 Reveal(
                   child: Container(
@@ -142,8 +145,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                 ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+              const Positioned(top: 8, right: 8, child: LanguageIconButton()),
+            ],
           ),
         ),
       ),

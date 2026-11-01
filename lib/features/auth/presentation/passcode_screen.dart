@@ -7,6 +7,7 @@ import '../../../core/auth/auth_providers.dart';
 import '../../../core/auth/biometric_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glow_background.dart';
+import '../../../core/widgets/language_switcher.dart';
 import 'widgets/numeric_keypad.dart';
 
 enum PasscodeMode { create, verify }
@@ -142,7 +143,7 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(),
+      appBar: AppBar(actions: const [LanguageIconButton()]),
       body: GlowBackground(
         child: SafeArea(
           child: LayoutBuilder(

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:locations_app/core/analytics/portfolio_stats.dart';
 import 'package:locations_app/core/database/app_providers.dart';
 import 'package:locations_app/features/analytics/presentation/analytics_screen.dart';
+import 'package:locations_app/l10n/app_localizations.dart';
 
 Contract _contract(
   String id,
@@ -110,7 +112,17 @@ void main() {
           portfolioStatsProvider.overrideWithValue(AsyncValue.data(stats)),
           currencyProvider.overrideWithValue('TND'),
         ],
-        child: const MaterialApp(home: AnalyticsScreen()),
+        child: const MaterialApp(
+          locale: Locale('fr'),
+          supportedLocales: [Locale('fr'), Locale('en'), Locale('ar')],
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: AnalyticsScreen(),
+        ),
       ),
     );
     await tester.pump(const Duration(seconds: 2));

@@ -16,7 +16,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/receipt.dart';
 import '../../../core/widgets/aurora_card.dart';
 import '../../../core/widgets/charts.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
+import '../../../core/widgets/web_content_constraint.dart';
 import '../application/contracts_providers.dart';
 
 class _LifetimeBar extends StatelessWidget {
@@ -114,6 +116,7 @@ class ContractDetailScreen extends ConsumerWidget {
           textDirection: isArabicText(c.tenantName) ? TextDirection.rtl : TextDirection.ltr,
         ),
         actions: [
+          const LanguageIconButton(),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: () => context.push('/contracts/${c.id}/edit'),
@@ -124,7 +127,8 @@ class ContractDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
+      body: WebContentConstraint(
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           if (c.archived)
@@ -329,6 +333,7 @@ class ContractDetailScreen extends ConsumerWidget {
             ),
           ],
         ],
+        ),
       ),
     );
   }

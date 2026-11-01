@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/arabic_text.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/shimmer.dart';
 
@@ -109,6 +110,7 @@ class _TenantsOverviewScreenState extends ConsumerState<TenantsOverviewScreen> {
                   : const Icon(Icons.file_download_outlined, size: 20),
               onPressed: _exporting ? null : _export,
             ),
+            const LanguageIconButton(),
           ],
         ),
         const SizedBox(height: 4),

@@ -5,6 +5,7 @@ import 'package:locations_app/l10n/app_localizations.dart';
 import '../../../core/auth/firebase_auth_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glow_background.dart';
+import '../../../core/widgets/language_switcher.dart';
 
 /// Connexion au compte Firebase partagé (mobile + web affichent les mêmes
 /// données). Un seul compte existe pour cette app — pas d'inscription.
@@ -55,16 +56,18 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
     return Scaffold(
       body: GlowBackground(
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+          child: Stack(
+            children: [
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                       Container(
                         width: 56,
                         height: 56,
@@ -163,11 +166,18 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                                 ),
                         ),
                       ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: LanguageIconButton(),
+              ),
+            ],
           ),
         ),
       ),

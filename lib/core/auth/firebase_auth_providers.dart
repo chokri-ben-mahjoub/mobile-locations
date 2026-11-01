@@ -20,10 +20,15 @@ class CloudAuthController {
   /// l'affichage, voir `CloudLoginErrorCode.message`.
   Future<String?> signIn(String email, String password) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
+      // Force le rafraîchissement du jeton avant de continuer : sans ça,
+      // l'écran des contrats peut démarrer ses lectures Firestore juste
+      // avant que le jeton ne soit pleinement propagé, ce qui déclenche un
+      // "permission denied" ponctuel au tout premier chargement.
+      await credential.user?.getIdToken(true);
       return null;
     } on FirebaseAuthException catch (e) {
       return e.code;

@@ -11,6 +11,7 @@ import '../../../core/export/export_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/utils/receipt.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/animated_count.dart';
 import '../../../core/widgets/aurora_card.dart';
 import '../../../core/widgets/charts.dart';
@@ -97,6 +98,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ),
                     ),
                   ),
+                  const LanguageIconButton(),
+                  const SizedBox(width: 8),
                   IconButton.filledTonal(
                     tooltip: l10n.exportContractsTooltip,
                     icon: _exporting

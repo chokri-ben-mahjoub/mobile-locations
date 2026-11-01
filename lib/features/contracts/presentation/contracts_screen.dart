@@ -16,6 +16,7 @@ import '../../../core/widgets/animated_count.dart';
 import '../../../core/widgets/aurora_card.dart';
 import '../../../core/widgets/charts.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/shimmer.dart';
@@ -474,6 +475,7 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
+        LanguageIconButton(color: scheme.onSurface),
         Pressable(
           onTap: onBell,
           child: Badge(

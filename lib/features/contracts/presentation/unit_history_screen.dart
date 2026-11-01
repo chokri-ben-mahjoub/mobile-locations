@@ -5,6 +5,8 @@ import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
+import '../../../core/widgets/language_switcher.dart';
+import '../../../core/widgets/web_content_constraint.dart';
 
 /// Historique de tous les locataires qui sont passés par un local donné.
 class UnitHistoryScreen extends ConsumerWidget {
@@ -20,8 +22,12 @@ class UnitHistoryScreen extends ConsumerWidget {
     final history = ref.watch(contractsForUnitProvider(unitNumber)).valueOrNull ?? [];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.unitHistoryTitle(unitNumber))),
-      body: history.isEmpty
+      appBar: AppBar(
+        title: Text(l10n.unitHistoryTitle(unitNumber)),
+        actions: const [LanguageIconButton()],
+      ),
+      body: WebContentConstraint(
+        child: history.isEmpty
           ? Center(child: Text(l10n.noUnitHistory))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -116,6 +122,7 @@ class UnitHistoryScreen extends ConsumerWidget {
                 );
               },
             ),
+      ),
     );
   }
 }

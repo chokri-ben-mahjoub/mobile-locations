@@ -7,9 +7,11 @@ import 'package:locations_app/l10n/app_localizations.dart';
 import '../../../core/database/app_providers.dart';
 import '../../../core/utils/format_utils.dart';
 import '../../../core/widgets/aurora_card.dart';
+import '../../../core/widgets/language_switcher.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../../core/widgets/section_card.dart';
+import '../../../core/widgets/web_content_constraint.dart';
 import '../application/contracts_providers.dart';
 
 /// Formulaire d'ajout (contractId == null) ou de modification d'un contrat.
@@ -203,8 +205,10 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               ? l10n.contractFormNewTenantForUnit(widget.prefillUnitNumber!)
               : l10n.contractFormNewTitle,
         ),
+        actions: const [LanguageIconButton()],
       ),
-      body: Form(
+      body: WebContentConstraint(
+        child: Form(
         key: _formKey,
         child: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -429,6 +433,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
