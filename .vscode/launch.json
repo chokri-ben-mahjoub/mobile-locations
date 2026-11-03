@@ -5,24 +5,21 @@
       "name": "LocaTrack",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main.dart",
-      "args": ["--dart-define=use_arabic=true"]
+      "program": "lib/main.dart"
     },
     {
       "name": "LocaTrack (profile mode)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "flutterMode": "profile",
-      "args": ["--dart-define=use_arabic=true"]
+      "flutterMode": "profile"
     },
     {
       "name": "LocaTrack (release mode)",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "flutterMode": "release",
-      "args": ["--dart-define=use_arabic=true"]
+      "flutterMode": "release"
     }
   ]
 }

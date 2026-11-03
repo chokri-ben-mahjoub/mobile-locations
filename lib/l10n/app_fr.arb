@@ -46,7 +46,7 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "exportSectionTitle": "Export",
-  "exportSectionBody": "Exportez tous les contrats (actifs et en attente) en CSV, Excel, PDF ou image — les noms de locataires en arabe s'affichent correctement dans les 4 formats.",
+  "exportSectionBody": "Exportez tous les contrats (actifs et en attente) en CSV, Excel ou image — les noms de locataires en arabe s'affichent correctement dans les 3 formats.",
   "exportShareButton": "Exporter / partager",
   "exportFailed": "Échec de l'export : {error}",
   "@exportFailed": {
@@ -62,11 +62,9 @@
   "share": "Partager",
   "formatCsv": "CSV",
   "formatExcel": "Excel",
-  "formatPdf": "PDF",
   "formatImage": "Image",
   "formatCsvDescription": "Fichier .csv, compatible Excel",
   "formatExcelDescription": "Classeur .xlsx avec mise en forme",
-  "formatPdfDescription": "Document PDF prêt à imprimer",
   "formatImageDescription": "Capture PNG du tableau, à partager",
   "screenClosedBeforeExport": "Écran fermé avant la fin de l'export.",
   "excelGenerationFailed": "Échec de la génération du fichier Excel.",

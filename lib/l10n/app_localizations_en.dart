@@ -135,7 +135,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportSectionBody =>
-      'Export all contracts (active and pending) as CSV, Excel, PDF or image — Arabic tenant names display correctly in all 4 formats.';
+      'Export all contracts (active and pending) as CSV, Excel or image — Arabic tenant names display correctly in all 3 formats.';
 
   @override
   String get exportShareButton => 'Export / share';
@@ -174,9 +174,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formatExcel => 'Excel';
 
   @override
-  String get formatPdf => 'PDF';
-
-  @override
   String get formatImage => 'Image';
 
   @override
@@ -184,9 +181,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get formatExcelDescription => '.xlsx workbook with formatting';
-
-  @override
-  String get formatPdfDescription => 'Print-ready PDF document';
 
   @override
   String get formatImageDescription =>

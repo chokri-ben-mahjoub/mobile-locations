@@ -46,7 +46,7 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "exportSectionTitle": "Export",
-  "exportSectionBody": "Export all contracts (active and pending) as CSV, Excel, PDF or image — Arabic tenant names display correctly in all 4 formats.",
+  "exportSectionBody": "Export all contracts (active and pending) as CSV, Excel or image — Arabic tenant names display correctly in all 3 formats.",
   "exportShareButton": "Export / share",
   "exportFailed": "Export failed: {error}",
   "@exportFailed": {
@@ -62,11 +62,9 @@
   "share": "Share",
   "formatCsv": "CSV",
   "formatExcel": "Excel",
-  "formatPdf": "PDF",
   "formatImage": "Image",
   "formatCsvDescription": ".csv file, Excel-compatible",
   "formatExcelDescription": ".xlsx workbook with formatting",
-  "formatPdfDescription": "Print-ready PDF document",
   "formatImageDescription": "PNG snapshot of the table, ready to share",
   "screenClosedBeforeExport": "Screen was closed before the export finished.",
   "excelGenerationFailed": "Failed to generate the Excel file.",

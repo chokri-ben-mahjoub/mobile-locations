@@ -6,7 +6,8 @@ import 'package:locations_app/core/data/models.dart';
 import 'package:locations_app/core/export/contracts_export_table.dart';
 import 'package:locations_app/core/export/csv_exporter.dart';
 import 'package:locations_app/core/export/excel_exporter.dart';
-import 'package:locations_app/core/export/pdf_table_exporter.dart';
+import 'package:locations_app/l10n/app_localizations_ar.dart';
+import 'package:locations_app/l10n/app_localizations_en.dart';
 import 'package:locations_app/l10n/app_localizations_fr.dart';
 
 // L'export image (ImageTableExporter.capture) n'est pas couvert ici : il
@@ -16,6 +17,12 @@ import 'package:locations_app/l10n/app_localizations_fr.dart';
 // faux scheduler de `flutter_test` (les frames n'y sont produites que
 // par un `pump()` manuel, pas en continu comme sur un vrai appareil).
 // Vérifié manuellement à l'écran à la place.
+//
+// Le PDF a été retiré de l'export (son moteur de rendu arabe manuel
+// produisait des résultats incorrects selon la langue de l'interface et
+// les noms) — CSV, Excel et Image restent, tous les trois affichant
+// l'arabe via du texte Unicode brut ou un vrai moteur de rendu Flutter,
+// indépendamment de la langue choisie pour l'interface de l'app.
 
 Contract _contract({required String tenantName}) => Contract(
       id: 'c1',
@@ -33,41 +40,40 @@ void main() {
   // Nom arabe réel tiré de la capture fournie par l'utilisateur.
   const arabicName = 'علاء الدين الطرابلسي';
 
-  group('export des contrats — nom de locataire en arabe', () {
-    final contracts = [_contract(tenantName: arabicName)];
-    final table = buildContractsExportTable(AppLocalizationsFr(), contracts, 'DT');
+  // Le nom du locataire est une DONNÉE, pas une chaîne traduite : il doit
+  // s'afficher correctement en CSV/Excel quelle que soit la langue
+  // choisie pour l'interface (FR/EN/AR) — c'est justement ce qui s'est
+  // cassé pour le PDF retiré.
+  for (final (localeName, l10n) in [
+    ('fr', AppLocalizationsFr()),
+    ('en', AppLocalizationsEn()),
+    ('ar', AppLocalizationsAr()),
+  ]) {
+    group('export des contrats — nom de locataire en arabe (interface $localeName)', () {
+      final contracts = [_contract(tenantName: arabicName)];
+      final table = buildContractsExportTable(l10n, contracts, 'DT');
 
-    test('ExportTable conserve le nom arabe tel quel', () {
-      expect(table.rows.single[1], arabicName);
-    });
+      test('ExportTable conserve le nom arabe tel quel', () {
+        expect(table.rows.single[1], arabicName);
+      });
 
-    test('CSV : le nom arabe est préservé en UTF-8 avec BOM', () {
-      final bytes = CsvExporter.encode(table);
-      expect(bytes[0], 0xEF);
-      expect(bytes[1], 0xBB);
-      expect(bytes[2], 0xBF);
-      final text = utf8.decode(bytes.sublist(3));
-      expect(text, contains(arabicName));
-    });
+      test('CSV : le nom arabe est préservé en UTF-8 avec BOM', () {
+        final bytes = CsvExporter.encode(table);
+        expect(bytes[0], 0xEF);
+        expect(bytes[1], 0xBB);
+        expect(bytes[2], 0xBF);
+        final text = utf8.decode(bytes.sublist(3));
+        expect(text, contains(arabicName));
+      });
 
-    test('Excel : le nom arabe est préservé comme texte brut', () {
-      final bytes = ExcelExporter.encode(table);
-      expect(bytes, isNotNull);
-      final decoded = xl.Excel.decodeBytes(bytes!);
-      final sheet = decoded.sheets.values.first;
-      final nameCell = sheet.cell(xl.CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: 1));
-      expect(nameCell.value.toString(), arabicName);
+      test('Excel : le nom arabe est préservé comme texte brut', () {
+        final bytes = ExcelExporter.encode(table);
+        expect(bytes, isNotNull);
+        final decoded = xl.Excel.decodeBytes(bytes!);
+        final sheet = decoded.sheets.values.first;
+        final nameCell = sheet.cell(xl.CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: 1));
+        expect(nameCell.value.toString(), arabicName);
+      });
     });
-
-    testWidgets('PDF : la génération ne lève aucune exception avec un nom arabe', (tester) async {
-      final bytes = await PdfTableExporter.encode(table, title: 'Contrats de location');
-      expect(bytes, isNotEmpty);
-      // Le document PDF embarque la police NotoNaskhArabic : son nom de
-      // police doit apparaître dans les octets du PDF généré, preuve que
-      // la police arabe a bien été chargée et utilisée (pas juste
-      // Helvetica par défaut qui ne sait pas dessiner l'arabe).
-      final content = latin1.decode(bytes, allowInvalid: true);
-      expect(content, contains('NotoNaskhArabic'));
-    });
-  });
+  }
 }

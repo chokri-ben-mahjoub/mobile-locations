@@ -136,7 +136,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportSectionBody =>
-      'Exportez tous les contrats (actifs et en attente) en CSV, Excel, PDF ou image — les noms de locataires en arabe s\'affichent correctement dans les 4 formats.';
+      'Exportez tous les contrats (actifs et en attente) en CSV, Excel ou image — les noms de locataires en arabe s\'affichent correctement dans les 3 formats.';
 
   @override
   String get exportShareButton => 'Exporter / partager';
@@ -175,9 +175,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get formatExcel => 'Excel';
 
   @override
-  String get formatPdf => 'PDF';
-
-  @override
   String get formatImage => 'Image';
 
   @override
@@ -185,9 +182,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get formatExcelDescription => 'Classeur .xlsx avec mise en forme';
-
-  @override
-  String get formatPdfDescription => 'Document PDF prêt à imprimer';
 
   @override
   String get formatImageDescription => 'Capture PNG du tableau, à partager';

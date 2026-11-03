@@ -337,7 +337,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportSectionBody.
   ///
   /// In fr, this message translates to:
-  /// **'Exportez tous les contrats (actifs et en attente) en CSV, Excel, PDF ou image — les noms de locataires en arabe s\'affichent correctement dans les 4 formats.'**
+  /// **'Exportez tous les contrats (actifs et en attente) en CSV, Excel ou image — les noms de locataires en arabe s\'affichent correctement dans les 3 formats.'**
   String get exportSectionBody;
 
   /// No description provided for @exportShareButton.
@@ -406,12 +406,6 @@ abstract class AppLocalizations {
   /// **'Excel'**
   String get formatExcel;
 
-  /// No description provided for @formatPdf.
-  ///
-  /// In fr, this message translates to:
-  /// **'PDF'**
-  String get formatPdf;
-
   /// No description provided for @formatImage.
   ///
   /// In fr, this message translates to:
@@ -429,12 +423,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Classeur .xlsx avec mise en forme'**
   String get formatExcelDescription;
-
-  /// No description provided for @formatPdfDescription.
-  ///
-  /// In fr, this message translates to:
-  /// **'Document PDF prêt à imprimer'**
-  String get formatPdfDescription;
 
   /// No description provided for @formatImageDescription.
   ///

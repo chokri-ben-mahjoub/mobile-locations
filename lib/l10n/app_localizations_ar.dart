@@ -135,7 +135,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get exportSectionBody =>
-      'صدّر جميع العقود (النشطة والمعلقة) بصيغة CSV أو Excel أو PDF أو صورة — تظهر أسماء المستأجرين بالعربية بشكل صحيح في الصيغ الأربع.';
+      'صدّر جميع العقود (النشطة والمعلقة) بصيغة CSV أو Excel أو صورة — تظهر أسماء المستأجرين بالعربية بشكل صحيح في الصيغ الثلاث.';
 
   @override
   String get exportShareButton => 'تصدير / مشاركة';
@@ -174,9 +174,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get formatExcel => 'Excel';
 
   @override
-  String get formatPdf => 'PDF';
-
-  @override
   String get formatImage => 'صورة';
 
   @override
@@ -184,9 +181,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get formatExcelDescription => 'ملف .xlsx بتنسيق جاهز';
-
-  @override
-  String get formatPdfDescription => 'مستند PDF جاهز للطباعة';
 
   @override
   String get formatImageDescription => 'صورة PNG للجدول، جاهزة للمشاركة';

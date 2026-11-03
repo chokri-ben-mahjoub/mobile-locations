@@ -46,7 +46,7 @@
     "placeholders": { "error": { "type": "String" } }
   },
   "exportSectionTitle": "التصدير",
-  "exportSectionBody": "صدّر جميع العقود (النشطة والمعلقة) بصيغة CSV أو Excel أو PDF أو صورة — تظهر أسماء المستأجرين بالعربية بشكل صحيح في الصيغ الأربع.",
+  "exportSectionBody": "صدّر جميع العقود (النشطة والمعلقة) بصيغة CSV أو Excel أو صورة — تظهر أسماء المستأجرين بالعربية بشكل صحيح في الصيغ الثلاث.",
   "exportShareButton": "تصدير / مشاركة",
   "exportFailed": "فشل التصدير: {error}",
   "@exportFailed": {
@@ -62,11 +62,9 @@
   "share": "مشاركة",
   "formatCsv": "CSV",
   "formatExcel": "Excel",
-  "formatPdf": "PDF",
   "formatImage": "صورة",
   "formatCsvDescription": "ملف .csv، متوافق مع Excel",
   "formatExcelDescription": "ملف .xlsx بتنسيق جاهز",
-  "formatPdfDescription": "مستند PDF جاهز للطباعة",
   "formatImageDescription": "صورة PNG للجدول، جاهزة للمشاركة",
   "screenClosedBeforeExport": "تم إغلاق الشاشة قبل انتهاء التصدير.",
   "excelGenerationFailed": "فشل إنشاء ملف Excel.",

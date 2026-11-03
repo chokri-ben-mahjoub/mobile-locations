@@ -33,6 +33,10 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) {
   final l10n = AppLocalizations.of(context);
   return showModalBottomSheet(
     context: context,
+    // Évite la présentation "boîte de dialogue flottante centrée" que
+    // Material 3 applique par défaut aux grands écrans (largeur max
+    // 640dp) — voir le même réglage sur la feuille d'export.
+    constraints: const BoxConstraints(maxWidth: 1080),
     builder: (sheetContext) => Consumer(
       builder: (sheetContext, ref, _) {
         final locale = ref.watch(localeControllerProvider);

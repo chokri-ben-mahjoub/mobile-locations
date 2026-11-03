@@ -9,30 +9,26 @@ import 'contracts_export_table.dart';
 import 'csv_exporter.dart';
 import 'excel_exporter.dart';
 import 'image_table_exporter.dart';
-import 'pdf_table_exporter.dart';
 import 'share_files.dart';
 
-enum ExportFormat { csv, excel, pdf, image }
+enum ExportFormat { csv, excel, image }
 
 extension ExportFormatUi on ExportFormat {
   String label(AppLocalizations l10n) => switch (this) {
         ExportFormat.csv => l10n.formatCsv,
         ExportFormat.excel => l10n.formatExcel,
-        ExportFormat.pdf => l10n.formatPdf,
         ExportFormat.image => l10n.formatImage,
       };
 
   String description(AppLocalizations l10n) => switch (this) {
         ExportFormat.csv => l10n.formatCsvDescription,
         ExportFormat.excel => l10n.formatExcelDescription,
-        ExportFormat.pdf => l10n.formatPdfDescription,
         ExportFormat.image => l10n.formatImageDescription,
       };
 
   IconData get icon => switch (this) {
         ExportFormat.csv => Icons.table_rows_rounded,
         ExportFormat.excel => Icons.grid_on_rounded,
-        ExportFormat.pdf => Icons.picture_as_pdf_rounded,
         ExportFormat.image => Icons.image_rounded,
       };
 }
@@ -40,11 +36,13 @@ extension ExportFormatUi on ExportFormat {
 enum ExportAction { share, download }
 
 /// Génère puis partage ou télécharge le fichier de contrats dans le format
-/// choisi. Les noms arabes des locataires sont pris en charge dans les 4
-/// formats : texte brut en CSV/Excel, police arabe embarquée
-/// (NotoNaskhArabic) en PDF, rendu natif Flutter en image. Inclut aussi la
-/// date du dernier loyer et des dernières factures STEG/SONEDE réglées par
-/// chaque locataire.
+/// choisi (CSV, Excel ou image). Les noms arabes des locataires sont pris
+/// en charge dans les 3 formats : texte brut en CSV/Excel, rendu natif
+/// Flutter en image — aucun traitement spécial n'est nécessaire, à
+/// l'inverse du PDF (retiré : son moteur de rendu dessinait les lettres
+/// arabes manuellement et produisait des résultats incorrects selon les
+/// noms). Inclut aussi la date du dernier loyer et des dernières factures
+/// STEG/SONEDE réglées par chaque locataire.
 class ContractsExportService {
   /// Retourne `true` si le fichier a été partagé/téléchargé, `false` si
   /// l'utilisateur a annulé (boîte "Enregistrer sous" fermée sans choix).
@@ -95,9 +93,6 @@ class ContractsExportService {
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           bytes,
         );
-      case ExportFormat.pdf:
-        final bytes = await PdfTableExporter.encode(table, title: title, l10n: l10n);
-        file = ShareableFile('${baseName}_$datePart.pdf', 'application/pdf', bytes);
       case ExportFormat.image:
         if (!context.mounted) {
           throw Exception('Screen closed before the export finished.');
@@ -160,6 +155,14 @@ Future<void> runContractsExport(BuildContext context, WidgetRef ref) async {
 Future<(ExportFormat, ExportAction)?> chooseExportFormat(BuildContext context) {
   return showModalBottomSheet<(ExportFormat, ExportAction)>(
     context: context,
+    // Material 3 limite par défaut la largeur d'une feuille à 640dp,
+    // centrée sur grand écran — ce qui, combiné à une fenêtre non
+    // maximisée, peut donner l'impression d'une boîte de dialogue
+    // flottante plutôt que d'une feuille ancrée en bas. On aligne plutôt
+    // sur la largeur de contenu du reste de l'app (voir
+    // WebContentConstraint) pour un rendu cohérent, pleine largeur en
+    // dessous de ce seuil.
+    constraints: const BoxConstraints(maxWidth: 1080),
     builder: (context) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
