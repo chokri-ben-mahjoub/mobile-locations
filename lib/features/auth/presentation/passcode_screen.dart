@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:locations_app/l10n/app_localizations.dart';
 
 import '../../../core/auth/auth_providers.dart';
@@ -86,6 +87,10 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
       final valid = ref.read(pinControllerProvider.notifier).verify(entered);
       if (valid) {
         ref.read(sessionAuthenticatedProvider.notifier).state = true;
+        // Navigation explicite plutôt que de compter uniquement sur le
+        // routeur pour réagir au changement d'état : voir le même
+        // correctif sur l'onboarding ("Commencer" qui ne faisait rien).
+        if (mounted) context.go('/contracts');
       } else {
         await _shake();
         if (!mounted) return;
@@ -108,8 +113,17 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
     }
 
     if (entered == _firstPin) {
-      await ref.read(pinControllerProvider.notifier).setPin(entered);
-      ref.read(sessionAuthenticatedProvider.notifier).state = true;
+      try {
+        await ref.read(pinControllerProvider.notifier).setPin(entered);
+        ref.read(sessionAuthenticatedProvider.notifier).state = true;
+        if (mounted) context.go('/contracts');
+      } catch (e) {
+        // Ne doit jamais échouer silencieusement : sans ce catch, une
+        // exception ici (ex: SharedPreferences indisponible) laissait
+        // l'écran bloqué sans aucun message après le 4e chiffre.
+        if (!mounted) return;
+        setState(() => _error = '$e');
+      }
     } else {
       await _shake();
       if (!mounted) return;

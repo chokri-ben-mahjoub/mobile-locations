@@ -56,6 +56,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _checking = false);
     if (success) {
       ref.read(sessionAuthenticatedProvider.notifier).state = true;
+      // Navigation explicite plutôt que de compter uniquement sur le
+      // routeur pour réagir au changement d'état — voir le même
+      // correctif sur le code PassCode et l'onboarding.
+      context.go('/contracts');
     } else {
       setState(() => _error = AppLocalizations.of(context).biometricCancelled);
     }
