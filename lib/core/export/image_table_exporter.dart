@@ -100,7 +100,11 @@ class _TableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: const TextStyle(fontFamily: 'Inter', color: Color(0xFF0B1214)),
+      style: const TextStyle(
+        fontFamily: 'Inter',
+        fontFamilyFallback: ['NotoNaskhArabic'],
+        color: Color(0xFF0B1214),
+      ),
       child: Container(
         color: Colors.white,
         padding: const EdgeInsets.all(20),

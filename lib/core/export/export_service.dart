@@ -150,9 +150,45 @@ Future<void> runContractsExport(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// Feuille de choix du format puis de l'action (partager ou télécharger) —
-/// retourne `null` si l'utilisateur annule.
+// Au-delà de cette largeur (bureau/web), le panneau d'export s'ancre à
+// droite de l'écran comme un volet latéral plutôt qu'en bas — plus naturel
+// sur grand écran, où une feuille "bas d'écran" ressemble à une anomalie.
+const _wideScreenBreakpoint = 900.0;
+
+/// Choix du format puis de l'action (partager ou télécharger) — retourne
+/// `null` si l'utilisateur annule. Feuille ancrée en bas sur mobile, volet
+/// ancré à droite sur grand écran (bureau/web).
 Future<(ExportFormat, ExportAction)?> chooseExportFormat(BuildContext context) {
+  final isWide = MediaQuery.sizeOf(context).width >= _wideScreenBreakpoint;
+  final content = _ExportSheetContent(isWide: isWide);
+
+  if (isWide) {
+    return showGeneralDialog<(ExportFormat, ExportAction)>(
+      context: context,
+      barrierLabel: AppLocalizations.of(context).exportSheetTitle,
+      barrierDismissible: true,
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (context, _, _) => Align(
+        alignment: Alignment.centerRight,
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          elevation: 8,
+          child: SizedBox(
+            width: 420,
+            height: double.infinity,
+            child: SafeArea(child: content),
+          ),
+        ),
+      ),
+      transitionBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+            .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+        child: child,
+      ),
+    );
+  }
+
   return showModalBottomSheet<(ExportFormat, ExportAction)>(
     context: context,
     // Material 3 limite par défaut la largeur d'une feuille à 640dp,
@@ -163,39 +199,48 @@ Future<(ExportFormat, ExportAction)?> chooseExportFormat(BuildContext context) {
     // WebContentConstraint) pour un rendu cohérent, pleine largeur en
     // dessous de ce seuil.
     constraints: const BoxConstraints(maxWidth: 1080),
-    builder: (context) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context).exportSheetTitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              AppLocalizations.of(context).exportSheetSubtitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            for (final format in ExportFormat.values) ...[
-              _FormatTile(
-                format: format,
-                onDownload: () => Navigator.of(context).pop((format, ExportAction.download)),
-                onShare: () => Navigator.of(context).pop((format, ExportAction.share)),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ],
-        ),
-      ),
-    ),
+    builder: (context) => SafeArea(child: content),
   );
+}
+
+class _ExportSheetContent extends StatelessWidget {
+  const _ExportSheetContent({required this.isWide});
+
+  final bool isWide;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, isWide ? 20 : 8, 20, 20),
+      child: Column(
+        mainAxisSize: isWide ? MainAxisSize.max : MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).exportSheetTitle,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            AppLocalizations.of(context).exportSheetSubtitle,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 16),
+          for (final format in ExportFormat.values) ...[
+            _FormatTile(
+              format: format,
+              onDownload: () => Navigator.of(context).pop((format, ExportAction.download)),
+              onShare: () => Navigator.of(context).pop((format, ExportAction.share)),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 class _FormatTile extends StatelessWidget {
