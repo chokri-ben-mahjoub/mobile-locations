@@ -251,15 +251,19 @@ class _PasscodeScreenState extends ConsumerState<PasscodeScreen>
                             ),
                           ),
                           const SizedBox(height: 12),
-                          SizedBox(
-                            height: 20,
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 20),
                             child: _error != null
-                                ? Text(
-                                    _error!,
-                                    style: TextStyle(
-                                      color: scheme.error,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: Text(
+                                      _error!,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: scheme.error,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   )
                                 : null,

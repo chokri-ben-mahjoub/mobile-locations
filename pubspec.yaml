@@ -2,7 +2,7 @@ name: locations_app
 description: "LocaTrack - Gestion des contrats de location"
 publish_to: 'none'
 
-version: 1.8.1+12
+version: 1.8.2+13
 
 environment:
   sdk: ^3.13.3
